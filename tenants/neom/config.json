@@ -1,0 +1,48 @@
+{
+  "tenant": {
+    "name": "NEOM",
+    "slug": "neom",
+    "region": "me-central2",
+    "tier": "forge_sovereign"
+  },
+  "subscription": {
+    "tier": "forge_sovereign",
+    "customAllocation": {
+      "includedTokensMonthly": 500000000,
+      "hardCapTokensMonthly": 1000000000,
+      "maxProjects": 50,
+      "maxUsers": 500,
+      "maxConcurrentAgents": 50
+    },
+    "billingCycle": "annual",
+    "gracePeriodDays": 60
+  },
+  "connectors": [
+    { "id": "tos", "enabled": true, "config": { "endpoint": "https://api.tos.gov.sa", "environment": "production" } },
+    { "id": "fasah", "enabled": true, "config": { "endpoint": "https://api.fasah.sa", "environment": "production" } },
+    { "id": "github", "enabled": true, "config": {} }
+  ],
+  "governance": {
+    "posture": "Maximum",
+    "requiredGates": ["pii_scan", "code_quality", "test_coverage", "security_scan", "hallucination_check"],
+    "complianceFrameworks": ["PDPL", "NCA_ECC", "NDMO"],
+    "dataRetentionDays": 2555
+  },
+  "workflows": {
+    "defaultTemplate": "compliance_heavy",
+    "customTemplates": []
+  },
+  "rbac": {
+    "roles": [
+      { "key": "neom_admin", "name": "NEOM Admin", "permissions": ["org:read", "org:write", "project:create", "project:read", "project:write", "story:create", "story:read", "story:write", "subscription:read", "budget:read", "budget:write", "agent:execute", "agent:configure", "admin:overrides"] },
+      { "key": "port_operator", "name": "Port Operator", "permissions": ["project:read", "story:create", "story:read", "story:write", "agent:execute"] },
+      { "key": "compliance_officer", "name": "Compliance Officer", "permissions": ["org:read", "project:read", "story:read", "subscription:read"] }
+    ]
+  },
+  "gapClosures": {
+    "G04": { "module": "connector-framework", "connectors": ["tos", "fasah"], "status": "configured" },
+    "G08": { "module": "data-catalog", "status": "pending" },
+    "G10": { "module": "compliance", "frameworks": ["PDPL", "NCA_ECC", "NDMO"], "status": "configured" },
+    "G11": { "module": "connector-framework", "connectors": ["ot_sensors", "scada"], "status": "pending" }
+  }
+}

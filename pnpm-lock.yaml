@@ -77,6 +77,38 @@ importers:
         specifier: 5.6.3
         version: 5.6.3
 
+  packages/forge/compliance:
+    dependencies:
+      '@forge/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@forge/db':
+        specifier: workspace:*
+        version: link:../db
+      '@forge/governance':
+        specifier: workspace:*
+        version: link:../governance
+    devDependencies:
+      '@types/node':
+        specifier: ^24.7.0
+        version: 24.12.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
+  packages/forge/connector-framework:
+    dependencies:
+      '@forge/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      '@types/node':
+        specifier: ^24.7.0
+        version: 24.12.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
   packages/forge/contracts:
     devDependencies:
       typescript:
@@ -260,6 +292,22 @@ importers:
       vite:
         specifier: ^7.1.7
         version: 7.3.2(@types/node@24.12.2)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
+
+  packages/forge/data-catalog:
+    dependencies:
+      '@forge/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@forge/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^24.7.0
+        version: 24.12.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
 
   packages/forge/db:
     dependencies:
