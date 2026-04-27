@@ -265,6 +265,25 @@ importers:
         specifier: 5.6.3
         version: 5.6.3
 
+  packages/forge/governance:
+    dependencies:
+      '@forge/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@forge/db':
+        specifier: workspace:*
+        version: link:../db
+      '@forge/events':
+        specifier: workspace:*
+        version: link:../events
+    devDependencies:
+      '@types/node':
+        specifier: ^24.7.0
+        version: 24.12.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
   packages/forge/subscription:
     dependencies:
       '@forge/contracts':
