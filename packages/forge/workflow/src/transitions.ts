@@ -1,4 +1,4 @@
-import { STATES, getState, type Phase } from "./states.js";
+import { STATES, type Phase } from "./states.js";
 
 export interface TransitionRule {
   from: string;

@@ -4,7 +4,7 @@ export interface TestCoverageResult {
   details: string;
 }
 
-export async function testCoverageGate(storyId: string, context: Record<string, unknown>): Promise<TestCoverageResult> {
+export async function testCoverageGate(_storyId: string, context: Record<string, unknown>): Promise<TestCoverageResult> {
   const coverage = (context.coverage as number) ?? 0;
   const threshold = (context.coverageThreshold as number) ?? 60;
   const passed = coverage >= threshold;

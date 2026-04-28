@@ -47,6 +47,6 @@ export function requireFeature(...features: FeatureKey[]) {
         details: { available: enabled, required: features },
       }, 403);
     }
-    await next();
+    return await next();
   });
 }

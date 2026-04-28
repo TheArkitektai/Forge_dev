@@ -16,7 +16,11 @@
   },
   "dependencies": {
     "@forge/contracts": "workspace:*",
-    "@forge/events": "workspace:*"
+    "@forge/db": "workspace:*",
+    "@forge/events": "workspace:*",
+    "bullmq": "^5.49.1",
+    "ioredis": "^5.6.1",
+    "postgres": "^3.4.5"
   },
   "devDependencies": {
     "typescript": "5.6.3"

@@ -5,7 +5,7 @@ export interface CodeQualityResult {
   details: string;
 }
 
-export async function codeQualityGate(storyId: string, context: Record<string, unknown>): Promise<CodeQualityResult> {
+export async function codeQualityGate(_storyId: string, context: Record<string, unknown>): Promise<CodeQualityResult> {
   const code = (context.code as string) || "";
   const issues: string[] = [];
   let score = 100;

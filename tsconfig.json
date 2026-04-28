@@ -27,5 +27,13 @@
     "rootDir": ".",
     "baseUrl": "."
   },
-  "exclude": ["node_modules", "dist", "build"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "tests",
+    "tenants",
+    "packages/forge/dashboard",
+    "**/*.test.ts"
+  ]
 }

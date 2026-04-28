@@ -51,6 +51,6 @@ export const subscriptionMiddleware = createMiddleware<{ Variables: Variables }>
       }, 403);
     }
     c.set("subscription", sub);
-    await next();
+    return await next();
   }
 );

@@ -18,7 +18,7 @@ export function requirePermission(...permissions: PermissionKey[]) {
     if (!hasAll) {
       return c.json({ code: "FORBIDDEN", message: "Insufficient permissions" }, 403);
     }
-    await next();
+    return await next();
   });
 }
 
@@ -28,6 +28,6 @@ export function requireRole(...roles: string[]) {
     if (!roles.includes(user.role)) {
       return c.json({ code: "FORBIDDEN", message: "Role not authorized" }, 403);
     }
-    await next();
+    return await next();
   });
 }

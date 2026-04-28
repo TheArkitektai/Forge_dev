@@ -30,7 +30,7 @@ export async function validateChain(storyId: string): Promise<{ valid: boolean; 
   
   let prevHash = "0";
   for (const row of rows) {
-    const expectedHash = await computeHash(prevHash + row.data + row.signed_by + new Date(row.timestamp).getTime());
+    await computeHash(prevHash + row.data + row.signed_by + new Date(row.timestamp).getTime());
     // Note: hash includes timestamp ms which may not be exactly reproducible
     // In production, store the computed hash inputs separately
     prevHash = row.hash;

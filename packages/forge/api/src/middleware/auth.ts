@@ -18,7 +18,7 @@ export const authMiddleware = createMiddleware<{ Variables: Variables }>(
     try {
       const payload = await verifyToken(token);
       c.set("user", payload);
-      await next();
+      return await next();
     } catch {
       return c.json({ code: "UNAUTHORIZED", message: "Invalid or expired token" }, 401);
     }

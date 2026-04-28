@@ -4,7 +4,7 @@ export interface PiiScanResult {
   details: string;
 }
 
-export async function piiScanGate(storyId: string, context: Record<string, unknown>): Promise<PiiScanResult> {
+export async function piiScanGate(_storyId: string, context: Record<string, unknown>): Promise<PiiScanResult> {
   // MVP: Check for common PII patterns in code/output
   const artifacts = (context.artifacts as string[]) || [];
   const findings: string[] = [];

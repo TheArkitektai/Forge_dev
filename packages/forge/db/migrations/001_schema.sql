@@ -243,9 +243,9 @@ CREATE TABLE tenant_budgets (
   scope_type TEXT NOT NULL DEFAULT 'organization',
   scope_id UUID NOT NULL,
   monthly_token_limit BIGINT NOT NULL,
-  alert_threshold_pct1 INTEGER NOT NULL DEFAULT 80,
-  alert_threshold_pct2 INTEGER NOT NULL DEFAULT 90,
-  alert_threshold_pct3 INTEGER NOT NULL DEFAULT 100,
+  alert_threshold_pct_1 INTEGER NOT NULL DEFAULT 80,
+  alert_threshold_pct_2 INTEGER NOT NULL DEFAULT 90,
+  alert_threshold_pct_3 INTEGER NOT NULL DEFAULT 100,
   on_limit_reached TEXT NOT NULL DEFAULT 'block',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

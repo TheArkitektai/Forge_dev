@@ -76,7 +76,7 @@ export async function generateReport(
 }
 
 export async function exportEvidencePack(
-  organizationId: string,
+  _organizationId: string,
   scope: "story" | "project" | "organization",
   scopeId: string,
   format: "PDF" | "JSON" | "CSV"

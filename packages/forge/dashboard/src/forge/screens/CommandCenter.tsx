@@ -47,6 +47,10 @@ import { useForge } from "@/forge/context";
 import { cn } from "@/lib/utils";
 import { AIAgentPanel } from "@/forge/components/AIAgentPanel";
 import { ContextBudgetGauge as ContextBudgetGaugeComponent } from "@/forge/components/ContextBudgetGauge";
+import { SubscriptionWidget } from "@/forge/components/SubscriptionWidget";
+import { UsageGauge } from "@/forge/components/UsageGauge";
+import { BudgetAlertBanner } from "@/forge/components/BudgetAlertBanner";
+import { useApiData } from "@/forge/hooks/useApiData";
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -68,23 +72,23 @@ const toneStyles: Record<string, string> = {
 const personaWidgetLayouts: Record<string, { main: string[]; sidebar: string[] }> = {
   "cto": {
     main: ["portfolio-kpis", "release-confidence-trend", "compounding-value"],
-    sidebar: ["proof-chain-gauge", "governance-queue", "operate-incidents"],
+    sidebar: ["proof-chain-gauge", "governance-queue", "operate-incidents", "subscription-widget", "usage-gauge", "budget-alerts"],
   },
   "delivery-lead": {
     main: ["phase-distribution", "story-spotlight", "active-assignments"],
-    sidebar: ["release-confidence-trend", "persona-metrics"],
+    sidebar: ["release-confidence-trend", "persona-metrics", "subscription-widget", "usage-gauge", "budget-alerts"],
   },
   "solution-architect": {
     main: ["architecture-impact", "story-spotlight", "cross-project-dependencies"],
-    sidebar: ["context-quality", "proof-chain-gauge"],
+    sidebar: ["context-quality", "proof-chain-gauge", "subscription-widget", "usage-gauge", "budget-alerts"],
   },
   "developer": {
     main: ["active-assignments", "context-quality", "ci-pipeline-status"],
-    sidebar: ["story-spotlight", "persona-metrics"],
+    sidebar: ["story-spotlight", "persona-metrics", "subscription-widget", "usage-gauge", "budget-alerts"],
   },
   "qa-lead": {
     main: ["test-coverage-matrix", "ci-pipeline-status", "story-spotlight"],
-    sidebar: ["phase-distribution", "persona-metrics"],
+    sidebar: ["phase-distribution", "persona-metrics", "subscription-widget", "usage-gauge", "budget-alerts"],
   },
   "security-officer": {
     main: ["security-scan-results", "compliance-dashboard", "governance-queue", "operate-incidents"],
@@ -96,7 +100,7 @@ const personaWidgetLayouts: Record<string, { main: string[]; sidebar: string[] }
   },
   "product-owner": {
     main: ["priority-matrix", "story-spotlight", "phase-distribution"],
-    sidebar: ["compounding-value", "persona-metrics"],
+    sidebar: ["compounding-value", "persona-metrics", "subscription-widget", "usage-gauge", "budget-alerts"],
   },
   "devops-lead": {
     main: ["ci-pipeline-status", "active-assignments", "cost-dashboard"],
@@ -1021,6 +1025,21 @@ function WidgetExplainabilityScore() {
 }
 
 // ---------------------------------------------------------------------------
+// Subscription / Usage / Budget widgets (wired to real API)
+// ---------------------------------------------------------------------------
+function WidgetSubscription() {
+  const { subscription, loading } = useApiData();
+  return <SubscriptionWidget subscription={subscription} loading={loading} />;
+}
+function WidgetUsageGauge() {
+  const { usage, loading } = useApiData();
+  return <UsageGauge usage={usage} loading={loading} />;
+}
+function WidgetBudgetAlerts() {
+  const { budgets, usage, loading } = useApiData();
+  return <BudgetAlertBanner budgets={budgets} usage={usage} loading={loading} />;
+}
+// ---------------------------------------------------------------------------
 // renderWidget dispatcher
 // ---------------------------------------------------------------------------
 function renderWidget(id: string): React.ReactNode {
@@ -1048,6 +1067,9 @@ function renderWidget(id: string): React.ReactNode {
     case "operate-incidents":           return <WidgetOperateIncidents />;
     case "ide-connections":             return <WidgetIDEConnections />;
     case "explainability-score":        return <WidgetExplainabilityScore />;
+    case "subscription-widget":         return <WidgetSubscription />;
+    case "usage-gauge":                 return <WidgetUsageGauge />;
+    case "budget-alerts":               return <WidgetBudgetAlerts />;
     default:                            return null;
   }
 }
