@@ -1,3 +1,4 @@
+import { startAggregationScheduler } from "@forge/subscription";
 import { createApp } from "./server.js";
 
 const app = createApp();
@@ -34,6 +35,11 @@ const server = createServer(async (req, res) => {
   res.end();
 });
 
-server.listen(port, () => {
+server.listen(port, async () => {
   console.log(`Forge API server running on http://localhost:${port}`);
+  try {
+    await startAggregationScheduler();
+  } catch (err) {
+    console.error("Failed to start aggregation scheduler:", err);
+  }
 });

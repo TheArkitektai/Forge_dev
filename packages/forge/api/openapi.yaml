@@ -1,0 +1,213 @@
+openapi: 3.1.0
+info:
+  title: Arkitekt Forge API
+  version: 1.0.0
+  description: |
+    Arkitekt Forge Platform API — subscription metering, workflow state machine,
+    governance proof chain, agent orchestration, and connector framework.
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        200:
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /organizations:
+    get:
+      summary: List organizations
+      operationId: listOrganizations
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                : #/components/schemas/ApiResponse
+    post:
+      summary: Create organization
+      operationId: createOrganization
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                slug:
+                  type: string
+                region:
+                  type: string
+      responses:
+        201:
+          description: Organization created
+  /projects:
+    get:
+      summary: List projects
+      operationId: listProjects
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of projects
+    post:
+      summary: Create project
+      operationId: createProject
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Project created
+  /users:
+    get:
+      summary: List users
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of users
+  /users/me:
+    get:
+      summary: Get current user
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Current user profile
+  /stories:
+    get:
+      summary: List stories
+      operationId: listStories
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of stories
+    post:
+      summary: Create story
+      operationId: createStory
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Story created
+  /subscription:
+    get:
+      summary: Get subscription status
+      operationId: getSubscription
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Subscription details
+        404:
+          description: No subscription found
+  /subscription/usage:
+    get:
+      summary: Get usage summary
+      operationId: getUsage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            default: current_month
+      responses:
+        200:
+          description: Usage summary with token counts
+  /subscription/usage/daily:
+    get:
+      summary: Get daily usage breakdown
+      operationId: getDailyUsage
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Daily token usage rows
+  /subscription/budgets:
+    get:
+      summary: Get tenant budgets
+      operationId: getBudgets
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Budget configurations
+  /billing/customer:
+    post:
+      summary: Create Stripe customer
+      operationId: createStripeCustomer
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Stripe customer created
+        503:
+          description: Stripe not configured
+  /billing/payment-intent:
+    post:
+      summary: Create payment intent
+      operationId: createPaymentIntent
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Payment intent created
+        503:
+          description: Stripe not configured
+  /billing/webhook:
+    post:
+      summary: Stripe webhook endpoint
+      operationId: stripeWebhook
+      responses:
+        200:
+          description: Webhook processed
+        400:
+          description: Invalid signature
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        data:
+          type: object
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object

@@ -1,0 +1,160 @@
+asyncapi: 3.0.0
+info:
+  title: Arkitekt Forge Event Bus
+  version: 1.0.0
+  description: |
+    Redis Streams-based event bus for Arkitekt Forge. Covers metering,
+    workflow transitions, budget alerts, and agent execution lifecycle.
+channels:
+  forge:events:
+    address: forge:events
+    messages:
+      tokenConsumed:
+        name: token_consumed
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [token_consumed]
+            organizationId:
+              type: string
+              format: uuid
+            payload:
+              type: object
+              properties:
+                inputTokens:
+                  type: integer
+                outputTokens:
+                  type: integer
+                costUsd:
+                  type: number
+            timestamp:
+              type: string
+              format: date-time
+      budgetAlert:
+        name: budget_alert
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [budget_alert]
+            organizationId:
+              type: string
+              format: uuid
+            payload:
+              type: object
+              properties:
+                scopeType:
+                  type: string
+                scopeId:
+                  type: string
+                usagePercent:
+                  type: number
+                thresholdPercent:
+                  type: number
+            timestamp:
+              type: string
+              format: date-time
+      budgetExceeded:
+        name: budget_exceeded
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [budget_exceeded]
+            organizationId:
+              type: string
+              format: uuid
+            payload:
+              type: object
+              properties:
+                scopeType:
+                  type: string
+                scopeId:
+                  type: string
+                monthlyLimit:
+                  type: integer
+                currentUsage:
+                  type: integer
+            timestamp:
+              type: string
+              format: date-time
+      storyTransitioned:
+        name: story_transitioned
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [story_transitioned]
+            organizationId:
+              type: string
+              format: uuid
+            payload:
+              type: object
+              properties:
+                storyId:
+                  type: string
+                fromState:
+                  type: string
+                toState:
+                  type: string
+                proofHash:
+                  type: string
+            timestamp:
+              type: string
+              format: date-time
+      gateEvaluated:
+        name: gate_evaluated
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [gate_evaluated]
+            organizationId:
+              type: string
+              format: uuid
+            payload:
+              type: object
+              properties:
+                gateId:
+                  type: string
+                storyId:
+                  type: string
+                passed:
+                  type: boolean
+                score:
+                  type: number
+            timestamp:
+              type: string
+              format: date-time
+operations:
+  publishEvent:
+    action: send
+    channel:
+      : '#/channels/forge:events'
+    messages:
+      - : '#/channels/forge:events/messages/tokenConsumed'
+      - : '#/channels/forge:events/messages/budgetAlert'
+      - : '#/channels/forge:events/messages/budgetExceeded'
+      - : '#/channels/forge:events/messages/storyTransitioned'
+      - : '#/channels/forge:events/messages/gateEvaluated'
+  consumeEvent:
+    action: receive
+    channel:
+      : '#/channels/forge:events'
+    messages:
+      - : '#/channels/forge:events/messages/tokenConsumed'
+      - : '#/channels/forge:events/messages/budgetAlert'
+      - : '#/channels/forge:events/messages/budgetExceeded'
+      - : '#/channels/forge:events/messages/storyTransitioned'
+      - : '#/channels/forge:events/messages/gateEvaluated'

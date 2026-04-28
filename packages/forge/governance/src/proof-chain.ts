@@ -7,14 +7,18 @@ export async function createProofChainEntry(
   signedBy: string
 ): Promise<ProofChainEntry> {
   const prevHash = await getLastHash(storyId);
-  const hash = await computeHash(prevHash + data + signedBy + Date.now());
-  
+  // Hash input: prevHash + data + signedBy only.
+  // Timestamp is NOT included — it is stored for human reference but must not
+  // be part of the hash because the DB timestamp (NOW()) is set after the hash
+  // is computed, making reproduction impossible.
+  const hash = await computeHash(prevHash + data + signedBy);
+
   const rows = await sql`
     INSERT INTO proof_chain_entries (story_id, previous_hash, data, hash, signed_by)
     VALUES (${storyId}, ${prevHash}, ${data}, ${hash}, ${signedBy})
     RETURNING id, story_id, previous_hash, data, hash, timestamp, signed_by
   `;
-  
+
   return rows[0] as ProofChainEntry;
 }
 
@@ -25,17 +29,22 @@ export async function validateChain(storyId: string): Promise<{ valid: boolean; 
     WHERE story_id = ${storyId}
     ORDER BY timestamp ASC
   `;
-  
+
   if (rows.length === 0) return { valid: true };
-  
+
   let prevHash = "0";
   for (const row of rows) {
-    await computeHash(prevHash + row.data + row.signed_by + new Date(row.timestamp).getTime());
-    // Note: hash includes timestamp ms which may not be exactly reproducible
-    // In production, store the computed hash inputs separately
+    const computedHash = await computeHash(prevHash + row.data + row.signed_by);
+    if (computedHash !== row.hash) {
+      return {
+        valid: false,
+        brokenAt: row.id,
+        reason: `Hash mismatch at entry ${row.id}: chain may have been tampered with.`,
+      };
+    }
     prevHash = row.hash;
   }
-  
+
   return { valid: true };
 }
 

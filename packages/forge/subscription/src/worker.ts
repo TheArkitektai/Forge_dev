@@ -29,7 +29,7 @@ async function runRollingAggregation(): Promise<void> {
   const rows = await sql`
     SELECT
       organization_id,
-      project_id,
+      COALESCE(project_id, '00000000-0000-0000-0000-000000000000') as project_id,
       DATE(created_at) AS date,
       SUM(input_tokens)        AS total_input_tokens,
       SUM(output_tokens)       AS total_output_tokens,
@@ -71,7 +71,7 @@ async function runDailyReconcile(targetDate?: string): Promise<void> {
   const rows = await sql`
     SELECT
       organization_id,
-      project_id,
+      COALESCE(project_id, '00000000-0000-0000-0000-000000000000') as project_id,
       DATE(created_at) AS date,
       SUM(input_tokens)        AS total_input_tokens,
       SUM(output_tokens)       AS total_output_tokens,

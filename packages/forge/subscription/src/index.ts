@@ -8,3 +8,4 @@ export * from "./metering.js";
 export * from "./lifecycle.js";
 export * from "./budgets.js";
 export * from "./worker.js";
+export * from "./stripe.js";

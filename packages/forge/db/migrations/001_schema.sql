@@ -125,7 +125,7 @@ CREATE TABLE proof_chain_entries (
 CREATE TABLE audit_events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  project_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000' REFERENCES projects(id) ON DELETE CASCADE,
   story_id UUID REFERENCES stories(id) ON DELETE SET NULL,
   type TEXT NOT NULL,
   title TEXT NOT NULL,
@@ -148,7 +148,7 @@ CREATE TABLE evidence_packs (
 CREATE TABLE memory_nodes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  project_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000' REFERENCES projects(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
   embedding VECTOR(1536),
   metadata JSONB,
@@ -195,7 +195,7 @@ CREATE TABLE subscriptions (
 CREATE TABLE token_usage_events (
   id UUID NOT NULL,
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  project_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000' REFERENCES projects(id) ON DELETE CASCADE,
   story_id UUID REFERENCES stories(id) ON DELETE SET NULL,
   agent_execution_id UUID REFERENCES agent_executions(id) ON DELETE SET NULL,
   model_provider TEXT NOT NULL,
@@ -212,7 +212,7 @@ CREATE TABLE token_usage_events_default PARTITION OF token_usage_events DEFAULT;
 
 CREATE TABLE token_usage_daily (
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  project_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000' REFERENCES projects(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   total_input_tokens BIGINT NOT NULL DEFAULT 0,
   total_output_tokens BIGINT NOT NULL DEFAULT 0,
@@ -225,7 +225,7 @@ CREATE TABLE token_usage_daily (
 
 CREATE TABLE token_usage_monthly (
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  project_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000' REFERENCES projects(id) ON DELETE CASCADE,
   month TEXT NOT NULL,
   total_input_tokens BIGINT NOT NULL DEFAULT 0,
   total_output_tokens BIGINT NOT NULL DEFAULT 0,
