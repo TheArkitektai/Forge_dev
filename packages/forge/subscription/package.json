@@ -1,0 +1,32 @@
+{
+  "name": "@forge/subscription",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./stripe.js": {
+      "import": "./dist/stripe.js",
+      "types": "./dist/stripe.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@forge/contracts": "workspace:*",
+    "@forge/db": "workspace:*",
+    "@forge/events": "workspace:*",
+    "bullmq": "^5.49.1",
+    "ioredis": "^5.6.1",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3"
+  }
+}
