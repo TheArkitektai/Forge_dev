@@ -1,0 +1,208 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.95rem;
+  --background: oklch(0.99 0.004 236);
+  --foreground: oklch(0.24 0.02 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.02 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.02 255);
+  --primary: oklch(0.56 0.18 251);
+  --primary-foreground: oklch(0.98 0.004 236);
+  --secondary: oklch(0.975 0.005 236);
+  --secondary-foreground: oklch(0.36 0.03 255);
+  --muted: oklch(0.972 0.005 236);
+  --muted-foreground: oklch(0.53 0.02 255);
+  --accent: oklch(0.972 0.005 236);
+  --accent-foreground: oklch(0.24 0.02 255);
+  --destructive: oklch(0.62 0.22 28);
+  --destructive-foreground: oklch(0.99 0.004 236);
+  --border: oklch(0.92 0.008 240);
+  --input: oklch(0.92 0.008 240);
+  --ring: oklch(0.68 0.12 236);
+  --chart-1: oklch(0.62 0.17 246);
+  --chart-2: oklch(0.72 0.14 161);
+  --chart-3: oklch(0.73 0.11 84);
+  --chart-4: oklch(0.56 0.1 280);
+  --chart-5: oklch(0.72 0.08 36);
+  --sidebar: oklch(0.99 0.004 236);
+  --sidebar-foreground: oklch(0.24 0.02 255);
+  --sidebar-primary: oklch(0.56 0.18 251);
+  --sidebar-primary-foreground: oklch(0.98 0.004 236);
+  --sidebar-accent: oklch(0.972 0.005 236);
+  --sidebar-accent-foreground: oklch(0.24 0.02 255);
+  --sidebar-border: oklch(0.92 0.008 240);
+  --sidebar-ring: oklch(0.68 0.12 236);
+}
+
+.dark {
+  --background: oklch(0.18 0.016 255);
+  --foreground: oklch(0.95 0.004 236);
+  --card: oklch(0.22 0.016 255);
+  --card-foreground: oklch(0.95 0.004 236);
+  --popover: oklch(0.22 0.016 255);
+  --popover-foreground: oklch(0.95 0.004 236);
+  --primary: oklch(0.72 0.16 246);
+  --primary-foreground: oklch(0.18 0.016 255);
+  --secondary: oklch(0.25 0.02 255);
+  --secondary-foreground: oklch(0.9 0.004 236);
+  --muted: oklch(0.25 0.02 255);
+  --muted-foreground: oklch(0.72 0.01 255);
+  --accent: oklch(0.25 0.02 255);
+  --accent-foreground: oklch(0.95 0.004 236);
+  --destructive: oklch(0.72 0.19 28);
+  --destructive-foreground: oklch(0.98 0.004 236);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.72 0.16 246);
+  --sidebar: oklch(0.2 0.016 255);
+  --sidebar-foreground: oklch(0.95 0.004 236);
+  --sidebar-primary: oklch(0.72 0.16 246);
+  --sidebar-primary-foreground: oklch(0.18 0.016 255);
+  --sidebar-accent: oklch(0.25 0.02 255);
+  --sidebar-accent-foreground: oklch(0.95 0.004 236);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.72 0.16 246);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image: radial-gradient(circle at top left, rgba(125, 211, 252, 0.14), transparent 28%), radial-gradient(circle at top right, rgba(16, 185, 129, 0.11), transparent 24%);
+  }
+
+  ::selection {
+    background: rgba(14, 116, 144, 0.18);
+    color: inherit;
+  }
+
+  /* Custom scrollbar for horizontal Kanban */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(148 163 184);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .surface-card {
+    @apply rounded-[20px] border border-slate-200 bg-white shadow-[0_24px_60px_-44px_rgba(15,23,42,0.22)];
+  }
+
+  .data-chip {
+    @apply rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600;
+  }
+
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1320px;
+    }
+  }
+}

@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Arkitekt: Agentic OS Deep Architecture v12</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ── ARKITEKT Brand Colours ── */
+  --brand-blue:   #2563EB;
+  --brand-green:  #10B981;
+  --brand-dark:   #0F0925;
+  --brand-darker: #18013F;
+
+  /* ── Surfaces (light theme) ── */
+  --bg:#F8FAFC;
+  --s1:#FFFFFF;
+  --s2:#F1F5F9;
+  --s3:#E8EEF6;
+  --b1:#E2E8F0;
+  --b2:#CBD5E1;
+  --b3:#B0BFCF;
+
+  /* ── Brand primary = blue (was purple/gold) ── */
+  --gold:#2563EB;
+  --gold2:#3B82F6;
+  --gold-dim:rgba(37,99,235,0.25);
+  --gold-g:rgba(37,99,235,0.08);
+
+  /* ── Was purple ── */
+  --purple:#2563EB;
+  --purple-dim:#3B82F6;
+  --purple-g:rgba(37,99,235,0.08);
+
+  /* ── Was teal ── */
+  --teal:#10B981;
+  --teal-g:rgba(16,185,129,0.10);
+  --amber:#F59E0B;
+
+  /* ── Text ── */
+  --t1:#0F0925;
+  --t2:#475569;
+  --t3:#78909C;
+
+  /* ── Agent = blue primary, agent2 = green ── */
+  --agent:#2563EB;
+  --agent2:#10B981;
+  --agent-d:rgba(37,99,235,0.09);
+
+  /* ── Semantic (light-bg adjusted) ── */
+  --green:#059669;
+  --green-d:rgba(5,150,105,0.10);
+  --red:#DC2626;
+  --red-d:rgba(220,38,38,0.10);
+  --blue:#2563EB;
+  --blue-d:rgba(37,99,235,0.10);
+  --orange:#EA580C;
+  --cyan:#10B981;
+
+  --fh:'Syne',sans-serif;
+  --fb:'IBM Plex Sans',sans-serif;
+  --fm:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+/* ═══ NAV ═══ */
+.nav{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(250,250,250,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--b1);z-index:100;display:flex;align-items:center;padding:0 32px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--purple),var(--teal));border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:12px;color:#fff}
+.nav-brand{font-family:var(--fh);font-weight:800;font-size:15px;color:var(--purple);letter-spacing:0.06em}
+.nav-sub{font-family:var(--fm);font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:4px;margin-left:auto;overflow-x:auto}
+.nav-link{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;color:var(--t2);text-decoration:none;transition:all 0.15s;cursor:pointer;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:var(--purple);background:var(--purple-g)}
+
+/* ═══ AUDIENCE & DISCIPLINE TABS ═══ */
+.audience-nav{padding:12px 32px;border-bottom:1px solid var(--b1);background:var(--s1);display:flex;gap:16px;align-items:center;font-size:12px}
+.audience-tab{padding:6px 12px;border-radius:6px;color:var(--t2);cursor:pointer;transition:all 0.15s}
+.audience-tab.active{color:var(--purple);background:var(--purple-g);font-weight:600}
+.discipline-nav{display:inline-flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.discipline-tab{padding:4px 10px;border-radius:5px;font-size:11px;color:var(--t2);cursor:pointer;transition:all 0.15s;border:1px solid transparent}
+.discipline-tab.active{color:var(--purple);background:var(--purple-g);border-color:var(--purple-dim)}
+
+/* ═══ HERO ═══ */
+.hero{padding:120px 32px 60px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(37,99,235,0.06)0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 16px;border-radius:20px;background:var(--purple-g);border:1px solid var(--b1);font-family:var(--fm);font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:20px}
+.hero h1{font-family:var(--fh);font-size:52px;font-weight:800;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,var(--purple),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:17px;color:var(--t2);max-width:720px;margin:0 auto 36px;line-height:1.7}
+.hero-stats{display:flex;justify-content:center;gap:40px}
+.hero-stat{text-align:center}
+.hero-stat-val{font-family:var(--fh);font-size:32px;font-weight:700;color:var(--purple)}
+.hero-stat-lbl{font-family:var(--fm);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.1em}
+
+/* ═══ SECTIONS ═══ */
+.section{padding:60px 32px;max-width:1200px;margin:0 auto}
+.section-lbl{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:var(--purple);margin-bottom:8px;font-weight:600}
+.section-title{font-family:var(--fh);font-size:28px;font-weight:700;margin-bottom:6px;color:var(--t1)}
+.section-desc{font-size:14px;color:var(--t2);max-width:700px;margin-bottom:32px;line-height:1.7}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--b1),transparent);margin:0 32px}
+
+/* ═══ CONCEPTUAL ARCHITECTURE ═══ */
+.concept-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:40px}
+.concept-box{background:var(--s1);border:2px solid var(--b1);border-radius:12px;padding:24px;text-align:center;transition:all 0.2s;cursor:default}
+.concept-box:hover{border-color:var(--purple);box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-2px)}
+.concept-box .cb-icon{font-size:32px;margin-bottom:12px}
+.concept-box .cb-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.concept-box .cb-desc{font-size:12px;color:var(--t2);line-height:1.5}
+.concept-box.layer1{border-top:4px solid var(--amber)}
+.concept-box.layer2{border-top:4px solid var(--teal)}
+.concept-box.layer3{border-top:4px solid var(--purple)}
+.concept-box.layer4{border-top:4px solid var(--blue)}
+.concept-box.layer5{border-top:4px solid var(--green)}
+
+/* ═══ ARCHITECTURE LAYERS ═══ */
+.layer-band{display:flex;align-items:stretch;gap:2px;margin-bottom:3px;cursor:pointer;transition:all 0.2s}
+.layer-band:hover{transform:translateX(4px)}
+.layer-label{width:160px;background:var(--s2);border:1px solid var(--b1);border-radius:8px 0 0 8px;display:flex;align-items:center;justify-content:center;padding:12px;font-family:var(--fh);font-size:13px;font-weight:700;color:var(--t1);flex-shrink:0;position:relative}
+.layer-label.l1{border-left:4px solid var(--amber)}
+.layer-label.l2{border-left:4px solid var(--teal)}
+.layer-label.l3{border-left:4px solid var(--purple)}
+.layer-label.l4{border-left:4px solid var(--blue)}
+.layer-label.l5{border-left:4px solid var(--green)}
+.layer-label.l6{border-left:4px solid var(--orange)}
+.layer-label.l7{border-left:4px solid #8B5CF6}
+.layer-label.l8{border-left:4px solid #EC4899}
+.layer-label.l9{border-left:4px solid #EC4899}
+.layer-content{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:0 8px 8px 0;display:flex;align-items:center;justify-content:flex-start;padding:12px 16px;gap:8px;overflow-x:auto}
+.layer-item{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;font-family:var(--fm);font-size:11px;color:var(--t2);white-space:nowrap;flex-shrink:0;transition:all 0.2s}
+.layer-item:hover{border-color:var(--purple);color:var(--purple)}
+.layer-detail{display:none;margin-top:12px;padding:16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px}
+.layer-band.expanded .layer-detail{display:block}
+.layer-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.layer-detail-item{padding:12px;background:var(--s1);border:1px solid var(--b1);border-radius:6px}
+.layer-detail-item .ldi-title{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;margin-bottom:4px}
+.layer-detail-item .ldi-content{font-size:12px;color:var(--t2);line-height:1.5}
+
+/* ═══ TECH STACK ═══ */
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stack-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:18px;transition:all 0.2s;cursor:default;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.stack-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--sc-color,var(--purple));opacity:0.8}
+.stack-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.sc-layer{font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);margin-bottom:6px}
+.sc-name{font-family:var(--fh);font-size:15px;font-weight:700;margin-bottom:3px;color:var(--t1)}
+.sc-tech{font-family:var(--fm);font-size:11px;color:var(--purple)}
+.sc-desc{font-size:12px;color:var(--t2);margin-top:8px;line-height:1.5}
+.sc-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-family:var(--fm);font-size:9px;font-weight:600;text-transform:uppercase;margin-top:8px}
+.sc-badge.v1{background:var(--green-d);color:var(--green)}
+.sc-badge.new{background:var(--blue-d);color:var(--blue)}
+.sc-badge.v2{background:rgba(249,115,22,0.1);color:var(--orange)}
+
+/* ═══ DESIGN CHOICES ═══ */
+.design-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.design-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.design-card:hover{border-color:var(--purple)}
+.design-card-header{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--b1)}
+.design-card-section{flex:1}
+.design-card-label{font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--t3);margin-bottom:4px;font-weight:600}
+.design-card-content{font-size:12px;color:var(--t2);line-height:1.5}
+.design-card-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.design-badge{font-family:var(--fm);font-size:9px;background:var(--purple-g);color:var(--purple);padding:2px 8px;border-radius:6px;font-weight:600}
+
+/* ═══ PIPELINE PHASES ═══ */
+.pipeline-container{display:flex;gap:16px;align-items:stretch;margin-bottom:32px;flex-wrap:wrap}
+.pipeline-phase{flex:1;background:var(--s1);border:2px solid var(--b1);border-radius:10px;padding:20px;text-align:center;transition:all 0.2s;min-width:150px}
+.pipeline-phase:hover{border-color:var(--purple);box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-2px)}
+.pipeline-phase .pp-num{font-family:var(--fh);font-size:24px;font-weight:700;color:var(--purple);margin-bottom:8px}
+.pipeline-phase .pp-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.pipeline-phase .pp-desc{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:12px}
+.pipeline-phase .pp-artifacts{font-family:var(--fm);font-size:10px;color:var(--t3);text-align:left;padding-top:12px;border-top:1px solid var(--b1)}
+
+/* ═══ KANBAN STATES ═══ */
+.states-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.state-phase{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:12px;margin-bottom:16px;grid-column:1/-1}
+.state-phase-name{font-family:var(--fh);font-size:12px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.state-badge{background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:6px 8px;font-family:var(--fm);font-size:10px;color:var(--t2);text-align:center;transition:all 0.2s;cursor:default}
+.state-badge:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-g)}
+
+/* ═══ ARCHITECTURE PRINCIPLES ═══ */
+.principles-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.principle-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.principle-card:hover{border-color:var(--purple)}
+.pc-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.pc-desc{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
+.pc-section{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--s3)}
+.pc-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.pc-section-label{font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--t3);margin-bottom:4px;font-weight:600}
+.pc-section-content{font-size:11px;color:var(--t2);line-height:1.5}
+
+/* ═══ AGENT TOOLBOX ═══ */
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tool-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:16px;transition:all 0.15s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.tool-card:hover{border-color:var(--purple);box-shadow:0 4px 16px rgba(37,99,235,0.10)}
+.tool-name{font-family:var(--fm);font-size:13px;font-weight:600;color:var(--purple);margin-bottom:4px}
+.tool-desc{font-size:12px;color:var(--t2);margin-bottom:6px;line-height:1.4}
+.tool-gov{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* ═══ IP/MOAT CALLOUT ═══ */
+.ip-callout{background:linear-gradient(135deg,var(--purple-g),var(--teal-g));border:2px solid var(--purple-dim);border-radius:10px;padding:20px;margin-bottom:32px}
+.ip-callout-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ip-callout-content{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px}
+.ip-callout-note{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* ═══ SUBSYSTEMS ═══ */
+.sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sub-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;cursor:pointer;transition:all 0.2s;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.sub-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.sub-card.expanded{grid-column:1/-1;background:var(--s2);border-color:var(--purple)}
+.sub-icon{font-size:22px;margin-bottom:10px}
+.sub-name{font-family:var(--fh);font-size:16px;font-weight:700;margin-bottom:4px;color:var(--t1)}
+.sub-tagline{font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.5}
+.sub-tech-row{display:flex;flex-wrap:wrap;gap:5px}
+.sub-tech{font-family:var(--fm);font-size:9px;padding:3px 8px;border-radius:6px;background:var(--s3);border:1px solid var(--b1);color:var(--t2)}
+.sub-expand{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--b1)}
+.sub-card.expanded .sub-expand{display:block}
+.sub-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sub-detail-box{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:14px}
+.sdb-title{font-family:var(--fh);font-size:13px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px;color:var(--t1)}
+.sdb-content{font-size:12px;color:var(--t2);line-height:1.6}
+.sdb-content code{font-family:var(--fm);font-size:10px;color:var(--purple);background:var(--s3);padding:2px 5px;border-radius:3px}
+
+/* ═══ FLOW ═══ */
+.flow-container{position:relative}
+.flow-step{display:flex;gap:20px;align-items:flex-start;padding:16px 0;position:relative;cursor:pointer;transition:all 0.15s}
+.flow-step:hover .flow-card{border-color:var(--purple);background:var(--s2)}
+.flow-num{width:40px;height:40px;border-radius:50%;background:var(--s2);border:2px solid var(--b1);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t2);flex-shrink:0;position:relative;z-index:2;transition:all 0.2s}
+.flow-step:hover .flow-num{border-color:var(--purple);color:var(--purple);background:var(--purple-g)}
+.flow-step.active .flow-num{border-color:var(--purple);color:#fff;background:var(--purple)}
+.flow-line{position:absolute;left:51px;top:56px;bottom:0;width:2px;background:var(--b1)}
+.flow-step:last-child .flow-line{display:none}
+.flow-card{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:14px 18px;transition:all 0.15s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.flow-card-hd{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.flow-card-title{font-family:var(--fh);font-size:14px;font-weight:600;color:var(--t1)}
+.flow-card-type{font-family:var(--fm);font-size:9px;padding:2px 8px;border-radius:8px;text-transform:uppercase}
+.flow-card-type.blocking{background:var(--red-d);color:var(--red)}
+.flow-card-type.agent{background:rgba(37,99,235,0.09);color:var(--purple)}
+.flow-card-type.human{background:var(--green-d);color:var(--green)}
+.flow-card-type.system{background:var(--blue-d);color:var(--blue)}
+.flow-card-type.advisory{background:rgba(249,115,22,0.1);color:var(--orange)}
+.flow-card-desc{font-size:12px;color:var(--t2);line-height:1.5}
+.flow-card-tech{font-family:var(--fm);font-size:10px;color:var(--t3);margin-top:6px}
+.flow-detail{display:none;margin-top:10px;padding:12px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;font-family:var(--fm);font-size:11px;color:var(--t2);line-height:1.7}
+.flow-step.active .flow-detail{display:block}
+
+/* ═══ STATE MACHINE ═══ */
+.sm-container{display:flex;flex-direction:column;gap:2px}
+.sm-phase{display:flex;align-items:stretch;gap:2px;height:56px}
+.sm-phase-name{width:100px;background:var(--s2);border-radius:8px 0 0 8px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:12px;font-weight:700;flex-shrink:0;color:var(--t1)}
+.sm-agent-state{flex:1;background:rgba(37,99,235,0.09);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:11px;color:var(--purple);position:relative;transition:all 0.2s;cursor:pointer}
+.sm-agent-state:hover{background:var(--purple-g);border-color:var(--purple)}
+.sm-arrow{width:40px;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:16px}
+.sm-human-gate{flex:1;background:var(--teal-g);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:11px;color:var(--teal);position:relative;transition:all 0.2s;cursor:pointer;border-radius:0 8px 8px 0}
+.sm-human-gate:hover{background:rgba(0,151,167,0.18);border-color:var(--teal)}
+.sm-label{font-size:8px;font-family:var(--fm);text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);position:absolute;top:4px;left:8px}
+.sm-special{display:flex;gap:12px;margin-top:12px}
+.sm-special-card{flex:1;padding:12px 14px;border-radius:8px;text-align:center;font-family:var(--fm);font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.sm-special-card.blocked{background:var(--red-d);border:1px solid rgba(232,69,69,0.2);color:var(--red)}
+.sm-special-card.done{background:var(--green-d);border:1px solid rgba(32,192,92,0.2);color:var(--green)}
+
+/* ═══ GOVERNANCE ═══ */
+.gov-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.gov-item{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;transition:all 0.15s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.gov-item:hover{border-color:var(--purple)}
+.gov-icon{font-size:18px;flex-shrink:0}
+.gov-content .gov-name{font-family:var(--fh);font-size:13px;font-weight:600;margin-bottom:3px;color:var(--t1)}
+.gov-content .gov-desc{font-size:11px;color:var(--t2);line-height:1.5}
+.gov-content .gov-type{font-family:var(--fm);font-size:9px;padding:1px 6px;border-radius:4px;display:inline-block;margin-top:4px}
+.gov-content .gov-type.blocking{background:var(--red-d);color:var(--red)}
+.gov-content .gov-type.advisory{background:rgba(249,115,22,0.1);color:var(--orange)}
+
+/* ═══ v11 NEW: WORKFLOW ENGINE ═══ */
+.wf-engine-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:24px;background:var(--b1);border-radius:10px;overflow:hidden}
+.wf-engine-node{background:var(--s1);padding:20px 14px;text-align:center;transition:all 0.2s}
+.wf-engine-node:hover{background:var(--purple-g)}
+.wf-engine-node .wen-icon{font-size:24px;margin-bottom:8px}
+.wf-engine-node .wen-title{font-family:var(--fh);font-size:12px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.wf-engine-node .wen-desc{font-size:10px;color:var(--t2);line-height:1.4}
+.wf-template-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:24px}
+.wf-template-card{background:var(--s1);border:2px solid var(--b1);border-radius:10px;padding:20px;text-align:center;transition:all 0.2s}
+.wf-template-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.wf-template-card .wtc-icon{font-size:28px;margin-bottom:10px}
+.wf-template-card .wtc-name{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.wf-template-card .wtc-desc{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:10px}
+.wf-template-card .wtc-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* ═══ v11 NEW: MODULE SYSTEM ═══ */
+.mod-category-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.mod-category{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.mod-category:hover{border-color:var(--purple);transform:translateY(-2px)}
+.mod-category .mc-icon{font-size:28px;margin-bottom:10px}
+.mod-category .mc-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.mod-category .mc-desc{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:10px}
+.mod-category .mc-examples{font-family:var(--fm);font-size:10px;color:var(--t3);line-height:1.5}
+.mod-manifest{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.mod-manifest pre{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:16px;font-family:var(--fm);font-size:11px;color:var(--t2);line-height:1.6;overflow-x:auto}
+
+/* ═══ v11 NEW: MULTI-TENANCY ═══ */
+.tenant-tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tenant-tier{background:var(--s1);border:2px solid var(--b1);border-radius:12px;padding:24px;transition:all 0.2s;position:relative;overflow:hidden}
+.tenant-tier:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.tenant-tier .tt-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-family:var(--fm);font-size:9px;font-weight:600;text-transform:uppercase;margin-bottom:12px}
+.tenant-tier .tt-badge.t1{background:var(--blue-d);color:var(--blue)}
+.tenant-tier .tt-badge.t2{background:rgba(139,92,246,0.1);color:#8B5CF6}
+.tenant-tier .tt-badge.t3{background:var(--green-d);color:var(--green)}
+.tenant-tier .tt-title{font-family:var(--fh);font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.tenant-tier .tt-desc{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px}
+.tenant-tier .tt-specs{font-family:var(--fm);font-size:10px;color:var(--t3);line-height:1.8}
+
+/* ═══ v11 NEW: CLOUD DEPLOYMENT ═══ */
+.deploy-pattern-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.deploy-pattern{background:var(--s1);border:2px solid var(--b1);border-radius:12px;padding:24px;transition:all 0.2s}
+.deploy-pattern:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.deploy-pattern .dp-label{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--purple);margin-bottom:8px;font-weight:600}
+.deploy-pattern .dp-title{font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.deploy-pattern .dp-desc{font-size:12px;color:var(--t2);line-height:1.6}
+.cloud-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--b1);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.cloud-table th{background:var(--s2);font-family:var(--fh);font-size:12px;font-weight:700;color:var(--t1);padding:12px 16px;text-align:left;border-bottom:2px solid var(--b1)}
+.cloud-table td{background:var(--s1);font-size:12px;color:var(--t2);padding:10px 16px;border-bottom:1px solid var(--b1)}
+.cloud-table tr:last-child td{border-bottom:none}
+.cloud-table tr:hover td{background:var(--purple-g)}
+
+/* ═══ v11 NEW: DR / BC ═══ */
+.dr-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.dr-metric{background:var(--s1);border:2px solid var(--b1);border-radius:10px;padding:20px;text-align:center;transition:all 0.2s}
+.dr-metric:hover{border-color:var(--purple);transform:translateY(-2px)}
+.dr-metric .dm-value{font-family:var(--fh);font-size:28px;font-weight:700;color:var(--purple);margin-bottom:4px}
+.dr-metric .dm-label{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);margin-bottom:8px}
+.dr-metric .dm-desc{font-size:11px;color:var(--t2);line-height:1.4}
+
+/* ═══ v11 NEW: TENANT LIFECYCLE ═══ */
+.lifecycle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.lifecycle-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.lifecycle-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.lifecycle-card .lc-icon{font-size:28px;margin-bottom:10px}
+.lifecycle-card .lc-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.lifecycle-card .lc-desc{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ═══ v11 NEW: API VERSIONING ═══ */
+.api-ver-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.api-ver-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.api-ver-card:hover{border-color:var(--purple)}
+.api-ver-card .avc-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px}
+.api-ver-card .avc-desc{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ═══ v11 NEW: COMPLIANCE EXPORT ═══ */
+.compliance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.compliance-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.compliance-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.compliance-card .cc-icon{font-size:24px;margin-bottom:10px}
+.compliance-card .cc-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.compliance-card .cc-desc{font-size:12px;color:var(--t2);line-height:1.5}
+
+/* ═══ v12 NEW: IDE CAPABILITY CARDS ═══ */
+.ide-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.ide-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.ide-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.ide-card .ic-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px}
+.ide-card .ic-desc{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .concept-grid,.stack-grid,.mod-category-grid,.wf-template-grid,.ide-grid{grid-template-columns:repeat(2,1fr)}
+  .principles-grid,.design-card-header,.api-ver-grid,.tenant-tier-grid,.deploy-pattern-grid,.dr-metric-grid,.lifecycle-grid{grid-template-columns:1fr}
+  .pipeline-container{flex-direction:column}
+  .hero h1{font-size:32px}
+  .hero-stats{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV BAR ═══ -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-mark">A</div>
+    <div>
+      <div class="nav-brand">THE ARKITEKT</div>
+      <div class="nav-sub">Agentic OS &middot; Architecture v12</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" onclick="scrollTo_('concept')">Conceptual</a>
+    <a class="nav-link" onclick="scrollTo_('layers')">Layers</a>
+    <a class="nav-link" onclick="scrollTo_('design')">Design Choices</a>
+    <a class="nav-link" onclick="scrollTo_('pipeline')">Pipeline</a>
+    <a class="nav-link" onclick="scrollTo_('states')">States</a>
+    <a class="nav-link" onclick="scrollTo_('workflow')">Workflow Engine</a>
+    <a class="nav-link" onclick="scrollTo_('principles')">Principles</a>
+    <a class="nav-link" onclick="scrollTo_('stack')">Tech Stack</a>
+    <a class="nav-link" onclick="scrollTo_('tools')">Toolbox</a>
+    <a class="nav-link" onclick="scrollTo_('modules')">Modules</a>
+    <a class="nav-link" onclick="scrollTo_('codeloop')">Code Loop</a>
+    <a class="nav-link" onclick="scrollTo_('operate')">Operate</a>
+    <a class="nav-link" onclick="scrollTo_('ide')">IDE Layer</a>
+    <a class="nav-link" onclick="scrollTo_('tenancy')">Multi-Tenancy</a>
+    <a class="nav-link" onclick="scrollTo_('cloud')">Cloud Deploy</a>
+    <a class="nav-link" onclick="scrollTo_('dr')">DR / BC</a>
+    <a class="nav-link" onclick="scrollTo_('lifecycle')">Tenant Lifecycle</a>
+    <a class="nav-link" onclick="scrollTo_('apiver')">API Versioning</a>
+    <a class="nav-link" onclick="scrollTo_('compliance')">Compliance</a>
+  </div>
+</nav>
+
+<!-- ═══ AUDIENCE & DISCIPLINE TABS ═══ -->
+<div class="audience-nav" style="margin-top:54px">
+  <span style="font-family:var(--fm);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.12em">Viewing as:</span>
+  <span class="audience-tab active" onclick="setAudience('director')">Director</span>
+  <span class="audience-tab" onclick="setAudience('enterprise')">Enterprise Architect</span>
+  <span class="audience-tab" onclick="setAudience('solution')">Solution Architect</span>
+  <span class="audience-tab" onclick="setAudience('technical')">Technical Architect</span>
+  <span class="audience-tab" onclick="setAudience('domain')">Domain Architects</span>
+
+  <div class="discipline-nav">
+    <span class="discipline-tab active" onclick="setDiscipline('all')">All</span>
+    <span class="discipline-tab" onclick="setDiscipline('business')">Business</span>
+    <span class="discipline-tab" onclick="setDiscipline('data')">Data</span>
+    <span class="discipline-tab" onclick="setDiscipline('application')">Application</span>
+    <span class="discipline-tab" onclick="setDiscipline('technology')">Technology</span>
+    <span class="discipline-tab" onclick="setDiscipline('infrastructure')">Infrastructure</span>
+    <span class="discipline-tab" onclick="setDiscipline('security')">Security</span>
+  </div>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-badge">Deep Architecture Reference</div>
+  <h1>The Arkitekt<br>Agentic OS v12</h1>
+  <p class="hero-sub">A governed AI delivery platform built to make software engineering faster, auditable, and enterprise ready. Human oversight at every gate. Configurable workflows. Modular agent architecture. Cloud native, cloud agnostic.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-val">9</div>
+      <div class="hero-stat-lbl">Architecture Layers</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">22</div>
+      <div class="hero-stat-lbl">Kanban States</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">18</div>
+      <div class="hero-stat-lbl">Architecture Principles</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">9</div>
+      <div class="hero-stat-lbl">Agent Tools</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">6</div>
+      <div class="hero-stat-lbl">SDLC Phases</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ CONCEPTUAL ARCHITECTURE ═══ -->
+<section class="section" id="concept">
+  <div class="section-lbl">Conceptual Architecture</div>
+  <div class="section-title">The Five Pillars of The Arkitekt</div>
+  <div class="section-desc">At its highest level, The Arkitekt is structured around five core capabilities that work together to deliver governed AI software engineering.</div>
+
+  <div class="concept-grid">
+    <div class="concept-box layer1">
+      <div class="cb-icon">&#x1F441;&#xFE0F;</div>
+      <div class="cb-title">Customer Experience</div>
+      <div class="cb-desc">Dashboard, Kanban, story detail, approvals. Real-time WebSocket updates. The face of the platform.</div>
+    </div>
+    <div class="concept-box layer2">
+      <div class="cb-icon">&#x1F50C;</div>
+      <div class="cb-title">API &amp; Integration</div>
+      <div class="cb-desc">Hono REST server, RBAC middleware, webhooks, SDK embedding. The boundary between customer and system.</div>
+    </div>
+    <div class="concept-box layer3">
+      <div class="cb-icon">&#x1F9E0;</div>
+      <div class="cb-title">Intelligence &amp; Agents</div>
+      <div class="cb-desc">Claude Agent SDK orchestrator, subagents, context compiler, model router. The thinking layer.</div>
+    </div>
+    <div class="concept-box layer4">
+      <div class="cb-icon">&#x1F6E1;&#xFE0F;</div>
+      <div class="cb-title">Process &amp; Governance</div>
+      <div class="cb-desc">State machine, workflow engine, approval gates, proof chain, audit trail. The control layer.</div>
+    </div>
+    <div class="concept-box layer5">
+      <div class="cb-icon">&#x1F4BE;</div>
+      <div class="cb-title">Data &amp; Infrastructure</div>
+      <div class="cb-desc">PostgreSQL, pgvector, Redis, S3, Vault, Kubernetes. The foundation.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ ARCHITECTURE LAYERS ═══ -->
+<section class="section" id="layers">
+  <div class="section-lbl">Architecture Layers</div>
+  <div class="section-title">9 Layers of The Arkitekt Stack</div>
+  <div class="section-desc">Click any layer to expand details. Layers 1 to 3 are customer facing IP. Layers 4 to 9 are the engine. Layer 6 is swappable infrastructure.</div>
+
+  <div style="display:flex;flex-direction:column;gap:3px">
+    <!-- Layer 1: Customer Interaction -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l1">Layer 1:<br>Customer<br>Interaction</div>
+      <div class="layer-content">
+        <div class="layer-item">React Dashboard</div>
+        <div class="layer-item">Kanban Board</div>
+        <div class="layer-item">Story Detail</div>
+        <div class="layer-item">Approvals UI</div>
+        <div class="layer-item">WebSocket Events</div>
+        <div class="layer-item">REST API</div>
+        <div class="layer-item">TypeScript SDK</div>
+        <div class="layer-item">Python SDK</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Responsibility</div>
+            <div class="ldi-content">Everything the customer sees, touches, and integrates with. UI, API, and SDKs.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Technology</div>
+            <div class="ldi-content">Hono (API), React (UI), WebSocket for real-time updates, TypeScript + Python SDKs for embedding.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Governance</div>
+            <div class="ldi-content">RBAC at API boundary. JWT tokens. Every request validated. Audit logging on every interaction.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Key Decisions</div>
+            <div class="ldi-content">Public API = IP. SDK = embedded revenue. Customers never see infrastructure layer.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 2: API & Integration -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l2">Layer 2:<br>API &amp;<br>Integration</div>
+      <div class="layer-content">
+        <div class="layer-item">Hono Server</div>
+        <div class="layer-item">RBAC Middleware</div>
+        <div class="layer-item">OAuth / SSO</div>
+        <div class="layer-item">Webhook Handler</div>
+        <div class="layer-item">Rate Limiting</div>
+        <div class="layer-item">API Versioning</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Responsibility</div>
+            <div class="ldi-content">Bridge between customer experience and internal systems. Every request is validated, authorized, and logged.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Technology</div>
+            <div class="ldi-content">Hono for ultra-fast routing, JWT-based auth, rate limiting middleware, error handling.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Security</div>
+            <div class="ldi-content">Validates every request. Enforces role hierarchy. Blocks unauthorized access. Audit trail on modifications.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Scaling</div>
+            <div class="ldi-content">Stateless design. Can run multiple instances behind load balancer. All state in PostgreSQL.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 3: Intelligence & Agent Orchestration -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l3">Layer 3:<br>Intelligence &amp;<br>Orchestration</div>
+      <div class="layer-content">
+        <div class="layer-item">Claude Agent SDK</div>
+        <div class="layer-item">Orchestrator Agent</div>
+        <div class="layer-item">Subagents</div>
+        <div class="layer-item">Context Compiler</div>
+        <div class="layer-item">Model Router</div>
+        <div class="layer-item">Tool Execution</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Purpose</div>
+            <div class="ldi-content">Intelligent work execution. Agents read context, make decisions, call tools, and report back. Always supervised by humans.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Architecture</div>
+            <div class="ldi-content">Orchestrator spawns subagents for parallel work. Each subagent has isolated context. Results aggregated by parent.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Control</div>
+            <div class="ldi-content">Model router selects LLM per phase. Execution can be swapped (Claude today, other providers tomorrow). Supervised autonomous execution in v12.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Observability</div>
+            <div class="ldi-content">Every agent call logged. Context window tracked. Token usage metered. Cost per execution visible.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 4: Process & Governance -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l4">Layer 4:<br>Process &amp;<br>Governance</div>
+      <div class="layer-content">
+        <div class="layer-item">State Machine</div>
+        <div class="layer-item">22 Kanban States</div>
+        <div class="layer-item">BullMQ Queue</div>
+        <div class="layer-item">Governance Pipeline</div>
+        <div class="layer-item">Approval Gates</div>
+        <div class="layer-item">Audit Trail</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Core Pattern</div>
+            <div class="ldi-content">Define (Plan/Design) &rarr; Build &rarr; Test &rarr; Ship &rarr; Operate. Six phases with human gates at every step.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">State Machine</div>
+            <div class="ldi-content">22 states organized across 6 phases. Every transition validated. Events emitted to real-time UI.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Blocking Rules</div>
+            <div class="ldi-content">10 mandatory gates + 3 advisory signals. Examples: hallucination detection, PII scanning, code quality checks, and security validation.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Proof Chain</div>
+            <div class="ldi-content">Hash-chain audit trail. Every decision captured. Immutable record. References to context, directives, and human approvals.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 5: Data & Context -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l5">Layer 5:<br>Data &amp;<br>Context</div>
+      <div class="layer-content">
+        <div class="layer-item">PostgreSQL</div>
+        <div class="layer-item">pgvector</div>
+        <div class="layer-item">Context Hub</div>
+        <div class="layer-item">Memory Nodes</div>
+        <div class="layer-item">Redis (Events)</div>
+        <div class="layer-item">S3 Storage</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Single Source of Truth</div>
+            <div class="ldi-content">PostgreSQL is THE system of record. All context, state, and history lives here. No git-sync drift.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Context Hub</div>
+            <div class="ldi-content">Project Memory, Story Memory, Code Understanding Index. Accumulated intelligence that compounds per customer.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Real-time Events</div>
+            <div class="ldi-content">Redis Streams emit events on every state change. Powers WebSocket updates to UI. Enables custom webhooks.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Binary Artifacts</div>
+            <div class="ldi-content">Screenshots, logs, build outputs stored in S3-compatible storage. Referenced by context graph, not duplicated.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 6: Infrastructure & Runtime -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l6">Layer 6:<br>Infrastructure &amp;<br>Runtime</div>
+      <div class="layer-content">
+        <div class="layer-item">Node.js Runtime</div>
+        <div class="layer-item">Redis Cluster</div>
+        <div class="layer-item">OpenSandbox</div>
+        <div class="layer-item">GitHub (Git + CI/CD)</div>
+        <div class="layer-item">Vault (Secrets)</div>
+        <div class="layer-item">Kubernetes</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Philosophy</div>
+            <div class="ldi-content">All swappable, open-source, and invisible to customers. Infrastructure changes never break API contracts.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Compute</div>
+            <div class="ldi-content">Node.js for API server, Kubernetes for orchestration, OpenSandbox for isolated execution.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Storage and Queuing</div>
+            <div class="ldi-content">PostgreSQL for data, Redis for queues/events, S3 for artifacts, Vault for secrets.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Upgrade Path</div>
+            <div class="ldi-content">Want to switch from Node to Go? Hidden behind API. Want to use different LLM? Wrapped in Execution Service. Customers never notice.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 7: Workflow Engine (NEW in v11) -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l7">Layer 7:<br>Workflow<br>Engine</div>
+      <div class="layer-content">
+        <div class="layer-item">Workflow Definition Store</div>
+        <div class="layer-item">Workflow Runtime</div>
+        <div class="layer-item">Parameterised State Machine</div>
+        <div class="layer-item">Transition Validator</div>
+        <div class="layer-item">Gate Executor</div>
+        <div class="layer-item">Visual Builder API</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Purpose</div>
+            <div class="ldi-content">The configurable SDLC engine. Customers define their own phases, states, gates, and transition rules. The platform adapts to process, not the reverse.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Architecture</div>
+            <div class="ldi-content">Workflow definitions stored as JSON schemas in PostgreSQL. Runtime loads definitions and drives the parameterised state machine. Transition Validator enforces entry/exit criteria.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Configurability</div>
+            <div class="ldi-content">Phases, states, approval gates, role definitions, and transition rules are all customer defined. Default templates ship out of the box but are not constraints.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Visual Builder</div>
+            <div class="ldi-content">Drag and drop workflow configuration in the UI. Visual Builder API exposes same capabilities for SDK and API consumers. Projects can inherit org defaults or override.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 8: Module System (NEW in v11) -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l8">Layer 8:<br>Module<br>System</div>
+      <div class="layer-content">
+        <div class="layer-item">Module Registry</div>
+        <div class="layer-item">Agent Module Runtime</div>
+        <div class="layer-item">Tool Connector Framework</div>
+        <div class="layer-item">Governance Gate Plugins</div>
+        <div class="layer-item">Language Sandbox Manager</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Purpose</div>
+            <div class="ldi-content">Plug and play extension architecture. Add specialised agents, tools, gates, and language runtimes without platform restart. Hot-swappable modules.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Registry</div>
+            <div class="ldi-content">Versioned catalogue of available modules. Each module has a manifest declaring capabilities, dependencies, and governance requirements. Deployed as container images.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Module Types</div>
+            <div class="ldi-content">Agent Modules (specialised subagents), Tool Connectors (pluggable tools with manifests), Governance Gate Plugins, Language Sandboxes (Node.js default, Python/Go/Java add-ons).</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Extensibility</div>
+            <div class="ldi-content">Enables the full use case roadmap: 14 native categories, 9 configurable categories, 12 add-on categories. Each project selects its module set.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 9: Code Execution Loop (NEW in v12) -->
+    <div class="layer-band" onclick="toggleLayer(this)">
+      <div class="layer-label l9">Layer 9:<br>Code Execution<br>Loop</div>
+      <div class="layer-content">
+        <div class="layer-item">Execution Orchestrator</div>
+        <div class="layer-item">Sandbox Runner</div>
+        <div class="layer-item">CI Feedback Loop</div>
+        <div class="layer-item">Iteration Engine</div>
+        <div class="layer-item">Explainability Reporter</div>
+        <div class="layer-item">Context Budget Manager</div>
+      </div>
+      <div class="layer-detail">
+        <div class="layer-detail-grid">
+          <div class="layer-detail-item">
+            <div class="ldi-title">Purpose</div>
+            <div class="ldi-content">Closes the gap between governance and execution. Takes approved design artifacts from the Design phase, generates code in isolated sandboxes, runs tests, reads CI results, iterates on failures, and surfaces a governed PR for human review. This is what transforms Forge from a governance dashboard into a delivery engine.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Architecture</div>
+            <div class="ldi-content">Execution Orchestrator spawns coding subagents inside OpenSandbox. Each iteration: write code, commit to feature branch, trigger GitHub Actions, read CI results, iterate if tests fail. Maximum 5 iterations before human escalation. All execution traced in proof chain.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Governance</div>
+            <div class="ldi-content">Human approval required before merge (Principle 1 preserved). Agent can execute code in isolation but cannot merge. Configurable autonomy levels per workflow template: off in Compliance Heavy, supervised in Enterprise Governed, enabled in Lightweight Agile.</div>
+          </div>
+          <div class="layer-detail-item">
+            <div class="ldi-title">Risk Controls</div>
+            <div class="ldi-content">Token budget ceiling per execution (Context Budget Manager). Maximum iteration count. Sandbox resource limits (CPU, memory, time). Automatic escalation on repeated failures. Full explainability report attached to every PR.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- IP/MOAT PROTECTION CALLOUT -->
+<section class="section">
+  <div class="ip-callout">
+    <div class="ip-callout-title">&#x1F6E1;&#xFE0F; Intellectual Property and MOAT Protection</div>
+    <div class="ip-callout-content">
+      This architecture view is designed for client understanding, partner conversations, and enterprise architecture discussions. <strong>Proprietary implementation details, algorithms, trade secrets, and internal optimization techniques are NOT exposed in this document.</strong> What is shown: the API contract, the governance model, and the public component relationships. What is hidden: the internal agent prompts, the context compiler's ranking algorithms, the memory indexing strategy, and all optimization tricks.
+    </div>
+    <div class="ip-callout-note">IP Lives in Layers 1 to 3 (Interaction, API, Intelligence). Infrastructure (Layer 6) is swappable open-source. Governance (Layer 4) and Workflow Engine (Layer 7) are the core differentiators.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DESIGN CHOICES -->
+<section class="section" id="design">
+  <div class="section-lbl">Design Choices</div>
+  <div class="section-title">Critical Decisions: Why We Built It This Way</div>
+  <div class="section-desc">Every significant architectural decision is documented here with options considered, rationale, and trade-offs.</div>
+
+  <div class="design-grid">
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">LLM Strategy</span>LLM Abstraction Layer</div>
+          <div class="design-card-content">Wrap Claude Agent SDK in an Execution Service so any LLM provider can be swapped.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Call Claude SDK directly (lock-in risk)<br>2) Build abstraction early (done in v10)<br>3) Let customers integrate their own (loss of control)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">Enterprise customers demand multi-provider options. If Claude API changes, only our wrapper updates. Maximizes flexibility without exposing implementation.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">One extra abstraction layer adds ~5ms latency. Worth it for multi-provider portability and customer confidence.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">Data Strategy</span>PostgreSQL as Source of Truth</div>
+          <div class="design-card-content">Single database. No git-sync. nightly pg_dump to GitHub for disaster recovery only.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Bi-directional git sync (v3 approach, too complex)<br>2) PostgreSQL only (chosen)<br>3) Event sourcing (too much overhead)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">Git sync was the #1 source of bugs. PostgreSQL with pgvector is simpler, faster, and more reliable. Git is backup, not the source.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">Lose git history as primary record. Gain simplicity and performance. Disaster recovery via pg_dump backups.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">Execution Model</span>State Machine + 22 States</div>
+          <div class="design-card-content">Kanban-inspired state machine with 22 discrete states across 6 phases (expanded from 17 states and 5 phases in v11).</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Free-form status field (no governance)<br>2) 5 states (too simple)<br>3) 22 states (chosen, granular without being overwhelming)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">22 states give fine-grained visibility including the new Operate phase. Each state has clear entry/exit criteria.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">More complexity than 5 states. Better governance than fewer. Slightly steeper learning curve for teams, but worth it.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">Agent Orchestration</span>Orchestrator + Subagents</div>
+          <div class="design-card-content">Parent agent spawns isolated subagents for parallel work within a story.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Single monolithic agent (slow)<br>2) Orchestrator + Subagents (chosen)<br>3) Fully distributed agents (no coordination)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">Orchestrator coordinates work. Subagents parallelize reading, writing, testing. Each has isolated context. Orchestrator aggregates results.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">Multiple context windows = more tokens. But speed and parallelism outweigh cost. Simpler coordination than fully distributed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">Governance Model</span>Supervised Autonomous Execution</div>
+          <div class="design-card-content">Agents can write and test code in sandboxes. Humans always approve before merge. Updated from Zero Autonomous Action in v11.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Full autonomy (unacceptable risk)<br>2) Supervised autonomous execution (chosen in v12)<br>3) Zero autonomous action (v11 status quo, too slow)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">Keeps humans in control of merge decisions. Builds trust with enterprise customers. Clear liability boundaries. Unlocks execution speed.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">Higher token cost (3x to 5x). Requires trust building with developer teams. Developer must understand the explainability report.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW in v11: Configurable Workflow Design Choice -->
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">Workflow Strategy</span>Configurable Workflow Engine</div>
+          <div class="design-card-content">The SDLC is a parameterised engine with customer-defined phases, states, gates, and transitions.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Hardcoded 5-phase pipeline (rigid, limits adoption)<br>2) Configurable workflow engine (chosen)<br>3) Fully open-ended (no guardrails, risky)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">Every enterprise has a unique process. A configurable engine adapts to customer workflows rather than forcing them to conform. Default templates provide immediate value. Custom workflows unlock enterprise adoption.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">Significantly more complex runtime than a hardcoded pipeline. Requires validation of arbitrary workflow definitions. Worth it for market breadth and enterprise fit.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW in v12: Execution Strategy Design Choice -->
+    <div class="design-card">
+      <div class="design-card-header">
+        <div class="design-card-section">
+          <div class="design-card-label">Decision</div>
+          <div class="design-card-title"><span class="design-badge">Execution Strategy</span>Supervised Execution Over Full Autonomy</div>
+          <div class="design-card-content">v12 introduces a Code Execution Loop where agents autonomously generate, test, and iterate code. But merge requires human approval.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Options Considered</div>
+          <div class="design-card-content">1) Full autonomy (unacceptable liability risk)<br>2) Supervised execution with human merge approval (chosen)<br>3) No autonomous execution (v11 status quo, too slow)</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Rationale</div>
+          <div class="design-card-content">Enterprise buyers asked two questions: 'Can your agents actually write code?' and 'Who is liable if the code is wrong?' Supervised execution answers both: yes they can write code, and the human who approves the merge accepts responsibility.</div>
+        </div>
+        <div class="design-card-section">
+          <div class="design-card-label">Trade-offs</div>
+          <div class="design-card-content">Higher token cost (3x to 5x). Requires trust building with developer teams. Developer must understand the explainability report. Risk of 'rubber stamp' approvals if explainability is poor.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PIPELINE PHASES -->
+<section class="section" id="pipeline">
+  <div class="section-lbl">Development Pipeline</div>
+  <div class="section-title">6 Default Phases of the Software Lifecycle</div>
+  <div class="section-desc">The Arkitekt ships with a default 6-phase SDLC. Every story flows through all six in order, with human gates at each transition. These phases are configurable via the Workflow Engine. v12 adds the Operate phase.</div>
+
+  <div class="pipeline-container">
+    <div class="pipeline-phase">
+      <div class="pp-num">1</div>
+      <div class="pp-title">Plan</div>
+      <div class="pp-desc">Directive issued. Context compiled. Agents prepare breakdown and estimates. Human approves or rejects.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Story breakdown<br>&bull; Estimates<br>&bull; Resource plan<br>&bull; Risk assessment
+      </div>
+    </div>
+    <div class="pipeline-phase">
+      <div class="pp-num">2</div>
+      <div class="pp-title">Design</div>
+      <div class="pp-desc">Architecture designed. APIs sketched. Database schema proposed. All reviewed before implementation begins.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Architecture doc<br>&bull; API spec<br>&bull; Data model<br>&bull; Design review
+      </div>
+    </div>
+    <div class="pipeline-phase">
+      <div class="pp-num">3</div>
+      <div class="pp-title">Develop</div>
+      <div class="pp-desc">Code written. Features implemented. Agents use sandbox for safe execution. Progress tracked continuously.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Feature branches<br>&bull; Code commits<br>&bull; Test coverage<br>&bull; Build artifacts
+      </div>
+    </div>
+    <div class="pipeline-phase">
+      <div class="pp-num">4</div>
+      <div class="pp-title">Test and Build</div>
+      <div class="pp-desc">Automated tests run. Proof chain validated. Security scans performed. Quality gates enforced before release.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Test results<br>&bull; Coverage report<br>&bull; Security scan<br>&bull; Build logs<br>&bull; Proof chain
+      </div>
+    </div>
+    <div class="pipeline-phase">
+      <div class="pp-num">5</div>
+      <div class="pp-title">Ship</div>
+      <div class="pp-desc">Code merged to main. Deployed to production. Monitoring enabled. Feedback collected for next iteration.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Release notes<br>&bull; Deployment log<br>&bull; Metrics<br>&bull; Feedback<br>&bull; Next story
+      </div>
+    </div>
+    <div class="pipeline-phase">
+      <div class="pp-num">6</div>
+      <div class="pp-title">Operate</div>
+      <div class="pp-desc">Runtime health monitored. Incidents detected and governed. Root cause analysed. Lessons captured in Context Hub. Operational memory compounds across releases.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Incident records<br>&bull; Root cause analysis<br>&bull; Runbook execution log<br>&bull; Operational KPIs<br>&bull; Lessons learned
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;font-size:12px;line-height:1.6;color:var(--t2)">
+    <strong style="color:var(--t1)">Development Approach:</strong> MVP-first iteration with versions 0.1, 0.2, etc. driven by customer demand and strategic priorities. Each version adds features while maintaining stability and governance. These 6 phases are the default template; the Workflow Engine allows customers to add, remove, or rename phases as needed.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KANBAN STATES -->
+<section class="section" id="states">
+  <div class="section-lbl">Kanban States</div>
+  <div class="section-title">22 Default States: The Complete Workflow</div>
+  <div class="section-desc">Every story progresses through these states in order. Each state has entry criteria, exit criteria, and a clear role responsible for transition. These 22 states are the default template and are fully configurable via the Workflow Engine.</div>
+
+  <div class="states-grid">
+    <!-- PLAN PHASE -->
+    <div class="state-phase">
+      <div class="state-phase-name">PHASE 1: PLAN (States 1 to 3)</div>
+      <div class="state-badge" title="Story created, awaiting directive">1. Pending</div>
+      <div class="state-badge" title="Directive received, context being compiled">2. Brief</div>
+      <div class="state-badge" title="Plan reviewed, ready for design">3. Ready Design</div>
+    </div>
+
+    <!-- DESIGN PHASE -->
+    <div class="state-phase">
+      <div class="state-phase-name">PHASE 2: DESIGN (States 4 to 6)</div>
+      <div class="state-badge" title="Architecture and API being designed">4. Designing</div>
+      <div class="state-badge" title="Design complete, awaiting approval">5. Design Review</div>
+      <div class="state-badge" title="Design approved, ready to develop">6. Ready Dev</div>
+    </div>
+
+    <!-- DEVELOP PHASE -->
+    <div class="state-phase">
+      <div class="state-phase-name">PHASE 3: DEVELOP (States 7 to 11)</div>
+      <div class="state-badge" title="Code being written in sandbox">7. Coding</div>
+      <div class="state-badge" title="Unit tests being written">8. Testing</div>
+      <div class="state-badge" title="Code review in progress">9. Code Review</div>
+      <div class="state-badge" title="Fixes being applied from review">10. Revisions</div>
+      <div class="state-badge" title="Development complete, ready for CI">11. Ready CI</div>
+    </div>
+
+    <!-- TEST & BUILD PHASE -->
+    <div class="state-phase">
+      <div class="state-phase-name">PHASE 4: TEST AND BUILD (States 12 to 14)</div>
+      <div class="state-badge" title="Automated tests and security scans running">12. CI Running</div>
+      <div class="state-badge" title="CI passed, awaiting final human approval">13. CI Pass</div>
+      <div class="state-badge" title="CI failed, requires fixes">14. CI Fail</div>
+    </div>
+
+    <!-- SHIP PHASE -->
+    <div class="state-phase">
+      <div class="state-phase-name">PHASE 5: SHIP (States 15 to 17)</div>
+      <div class="state-badge" title="PR merged to main branch">15. Shipped</div>
+      <div class="state-badge" title="Deployed to production">16. Released</div>
+      <div class="state-badge" title="Archived, story complete">17. Done</div>
+    </div>
+
+    <!-- OPERATE PHASE (NEW in v12) -->
+    <div class="state-phase">
+      <div class="state-phase-name">PHASE 6: OPERATE (States 18 to 22) &middot; New in v12</div>
+      <div class="state-badge" title="Production health baseline established, telemetry flowing">18. Monitoring</div>
+      <div class="state-badge" title="Alert received from external monitoring, incident story created">19. Incident Detected</div>
+      <div class="state-badge" title="Root cause analysis in progress, evidence being gathered">20. Investigating</div>
+      <div class="state-badge" title="Fix approved and being deployed, rollback plan ready">21. Remediating</div>
+      <div class="state-badge" title="Incident resolved, lessons captured, Context Hub updated">22. Resolved</div>
+    </div>
+
+    <!-- BLOCKED STATE (Special) -->
+    <div class="state-phase">
+      <div class="state-phase-name">SPECIAL: Blocked State (Transition from any state)</div>
+      <div class="state-badge" title="Blocker detected, awaiting resolution">Blocked</div>
+      <div class="state-badge" title="Story cancelled, no further action">Cancelled</div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;padding:16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;font-size:11px;color:var(--t2);line-height:1.6">
+    <strong style="color:var(--t1)">Flow Rules:</strong> Stories progress sequentially through phases. State transitions emit events to BullMQ and Redis Streams. Every transition is logged in the proof chain. Humans can reject, causing stories to move backward (back to Ready Design, for instance). Blocked state can be entered from any state; once resolved, story resumes from where it was blocked. The Operate phase (v12) closes the lifecycle loop for production incidents.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION A: CONFIGURABLE WORKFLOW ENGINE ═══ -->
+<section class="section" id="workflow">
+  <div class="section-lbl">Configurable Workflow Engine</div>
+  <div class="section-title">The SDLC Is a Parameterised Engine, Not a Fixed Pipeline</div>
+  <div class="section-desc">The Arkitekt's workflow engine is fully configurable. Customers define their own phases, states, approval gates, role definitions, and transition rules. The default 6 phases and 22 states are a starting template, not a constraint.</div>
+
+  <!-- Design Choice Callout -->
+  <div style="padding:20px;background:linear-gradient(135deg,var(--purple-g),var(--teal-g));border:2px solid var(--purple-dim);border-radius:10px;margin-bottom:28px">
+    <div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px">&#x1F527; Why Configurable Over Hardcoded?</div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px">
+      Every enterprise has a unique software delivery process. A startup may want three phases. A bank may need twelve. A government agency may require dual approval at every transition. Hardcoding the SDLC would force customers to adapt to the platform. The configurable engine inverts this: the platform adapts to the customer. Default templates provide immediate value on day one, while the full configuration surface unlocks enterprise adoption at scale.
+    </div>
+    <div style="font-family:var(--fm);font-size:10px;color:var(--t3)">Workflow definitions are stored as JSON schemas in PostgreSQL. The Workflow Definition API allows programmatic creation and modification. The Visual Builder in the UI allows drag-and-drop configuration.</div>
+  </div>
+
+  <!-- Workflow Engine Architecture Diagram -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px">Workflow Engine Architecture</div>
+  <div class="wf-engine-grid">
+    <div class="wf-engine-node">
+      <div class="wen-icon">&#x1F4E6;</div>
+      <div class="wen-title">Workflow Definition Store</div>
+      <div class="wen-desc">JSON schemas in PostgreSQL. Versioned. Per org or per project.</div>
+    </div>
+    <div class="wf-engine-node">
+      <div class="wen-icon">&#x2699;&#xFE0F;</div>
+      <div class="wen-title">Workflow Runtime</div>
+      <div class="wen-desc">Loads definitions. Drives execution. Manages lifecycle.</div>
+    </div>
+    <div class="wf-engine-node">
+      <div class="wen-icon">&#x1F504;</div>
+      <div class="wen-title">Parameterised State Machine</div>
+      <div class="wen-desc">States, transitions, and rules defined by configuration, not code.</div>
+    </div>
+    <div class="wf-engine-node">
+      <div class="wen-icon">&#x2705;</div>
+      <div class="wen-title">Transition Validator</div>
+      <div class="wen-desc">Enforces entry/exit criteria per state. Customer defined rules.</div>
+    </div>
+    <div class="wf-engine-node">
+      <div class="wen-icon">&#x1F6AA;</div>
+      <div class="wen-title">Gate Executor</div>
+      <div class="wen-desc">Runs approval gates. Configurable approver count, roles, and thresholds.</div>
+    </div>
+  </div>
+
+  <!-- What Is Configurable -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;margin-top:28px">What Is Configurable</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px">
+    <div class="tool-card">
+      <div class="tool-name">&#x1F4CB; Phases</div>
+      <div class="tool-desc">Add, remove, or rename phases beyond the default six. A three-phase startup workflow and a twelve-phase compliance workflow both run on the same engine.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x2B1C; States</div>
+      <div class="tool-desc">The default 22 states are a template. Each phase can have any number of states with customer-defined names and semantics.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F6AA; Approval Gates</div>
+      <div class="tool-desc">Define how many approvers, which roles must approve, and at which transitions. Single approver for agile teams, dual approval for regulated industries.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F465; Role Definitions</div>
+      <div class="tool-desc">RBAC roles are customer-defined, not platform-imposed. Create custom roles that map to your organisation's structure and permissions model.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F500; Transition Rules</div>
+      <div class="tool-desc">Entry and exit criteria per state can be customised per project. Define what must be true before a story can move forward or backward.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F3D7;&#xFE0F; Project Inheritance</div>
+      <div class="tool-desc">Each project can have its own workflow definition, or inherit from an organisation default. Override at the project level without affecting other projects.</div>
+    </div>
+  </div>
+
+  <!-- Default Workflow Templates -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px">Default Workflow Templates</div>
+  <div class="wf-template-grid">
+    <div class="wf-template-card">
+      <div class="wtc-icon">&#x1F4D0;</div>
+      <div class="wtc-name">Standard SDLC</div>
+      <div class="wtc-desc">The default 6-phase, 22-state workflow. Full governance, proof chain, and approval gates at every transition.</div>
+      <div class="wtc-meta">6 Phases &middot; 22 States &middot; Full Gates</div>
+    </div>
+    <div class="wf-template-card">
+      <div class="wtc-icon">&#x26A1;</div>
+      <div class="wtc-name">Lightweight Agile</div>
+      <div class="wtc-desc">Streamlined 3-phase workflow for startups and fast-moving teams. Fewer gates, faster iteration, essential governance only.</div>
+      <div class="wtc-meta">3 Phases &middot; 9 States &middot; Essential Gates</div>
+    </div>
+    <div class="wf-template-card">
+      <div class="wtc-icon">&#x1F3DB;&#xFE0F;</div>
+      <div class="wtc-name">Enterprise Governed</div>
+      <div class="wtc-desc">Extended workflow with dual approval gates, mandatory architecture review, and compliance checkpoints at every phase boundary.</div>
+      <div class="wtc-meta">7 Phases &middot; 24 States &middot; Dual Approval</div>
+    </div>
+    <div class="wf-template-card">
+      <div class="wtc-icon">&#x1F4DC;</div>
+      <div class="wtc-name">Compliance Heavy</div>
+      <div class="wtc-desc">Maximum governance for regulated industries. Triple approval, evidence collection at every state, mandatory security review, audit-ready documentation.</div>
+      <div class="wtc-meta">8 Phases &middot; 30 States &middot; Triple Approval</div>
+    </div>
+    <div class="wf-template-card">
+      <div class="wtc-icon">&#x1F916;</div>
+      <div class="wtc-name">AI Accelerated</div>
+      <div class="wtc-desc">Full Code Execution Loop enabled. Agents autonomously generate and test code. Human approval required before merge. Maximum 5 iterations. Explainability reports mandatory.</div>
+      <div class="wtc-meta">6 Phases &middot; 22 States &middot; Supervised Execution &middot; Explainability</div>
+    </div>
+  </div>
+
+  <!-- Workflow Definition Schema -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;margin-top:28px">Workflow Definition Schema</div>
+  <div class="mod-manifest">
+    <pre>{
+  "workflow_id": "uuid",
+  "name": "Enterprise Governed",
+  "version": "1.2.0",
+  "organisation_id": "uuid",
+  "phases": [
+    {
+      "id": "plan",
+      "name": "Plan",
+      "order": 1,
+      "states": [
+        {
+          "id": "pending",
+          "name": "Pending",
+          "entry_criteria": [],
+          "exit_criteria": ["directive_attached", "context_compiled"],
+          "assignable_roles": ["project_manager", "tech_lead"]
+        }
+      ],
+      "gates": [
+        {
+          "id": "plan_approval",
+          "type": "approval",
+          "required_approvers": 2,
+          "approver_roles": ["tech_lead", "product_owner"],
+          "timeout_hours": 48
+        }
+      ]
+    }
+  ],
+  "transition_rules": {
+    "allow_backward": true,
+    "blocked_from_any_state": true,
+    "cancelled_requires_reason": true
+  },
+  "metadata": {
+    "created_by": "admin@org.com",
+    "template_source": "enterprise_governed_v1"
+  }
+}</pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ ARCHITECTURE PRINCIPLES & GOVERNANCE ═══ -->
+<section class="section" id="principles">
+  <div class="section-lbl">Architecture Principles and Governance</div>
+  <div class="section-title">The 18 Principles Guiding The Arkitekt</div>
+  <div class="section-desc">Based on TOGAF, NORA, and NDMO/DAMA frameworks. These principles ensure that governance is not bureaucratic but architectural. v12 adds Principles 17 and 18.</div>
+
+  <div class="principles-grid">
+    <!-- PRINCIPLE 1 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F3AF; Supervised Autonomous Execution</div>
+      <div class="pc-desc">Agents execute code in sandboxes. Humans approve merges. Always. Updated from Zero Autonomous Action in v11.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Keeps humans in control of merge decisions. Builds customer trust. Clear liability boundaries. Non-negotiable for enterprise. v12 extends this to allow supervised code execution within governed boundaries.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Faster than zero autonomous action, safer than full autonomy. Requires human attention for merge approvals. Trade-off: speed with safety.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Blocking Control #1: No agent can merge to main without human approval. Agents can write and test code in sandboxes. Enforced at API boundary and Governance Pipeline.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 2 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F6AA; Human Governance at Every Gate</div>
+      <div class="pc-desc">Six phases. Six human approval gates. No shortcuts.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">SDLC gates ensure quality at each step. Plan review prevents wasted effort. Design review catches architecture issues early.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Adds ~2 to 5 hours of human time per story. Early feedback prevents rework. Net savings in overall timeline.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">State Machine enforces transition rules. BullMQ job queue blocks progression until human approves.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 3 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4CB; Immutable Audit Trail</div>
+      <div class="pc-desc">Every decision recorded. Hash-chain proof. No editing history.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Regulatory compliance (SOX, HIPAA). Dispute resolution. Root cause analysis. Legal defense.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Adds ~10% storage overhead. No negative performance impact. Massive value for regulated industries.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Proof Chain immutability enforced at database layer. PostgreSQL constraints. Git commits embedded in PR descriptions.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 4 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F510; Least Privilege for Agents</div>
+      <div class="pc-desc">Agents get exactly the permissions they need. Nothing more.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Security principle. Limits blast radius if agent is compromised or behaves unexpectedly.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Agents need to ask for elevated permissions. Slight overhead in tool design. Massive security benefit.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Tool visibility enforced at API level. Persona SHA-256 check. GitHub token scopes. Vault path prefixes.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 5 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4CA; Complete Context Compilation</div>
+      <div class="pc-desc">Agents get 8-step brief before every execution. Full codebase context via pgvector.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Better decisions require better context. Memory nodes compound per customer. Agents never start cold.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Context compilation takes ~2 to 3 seconds. Offset by better code quality and fewer rework cycles.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Context Compiler mandatory before agent execution. Gating at BullMQ job level. Metrics tracked.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 6 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F504; Transparent Decision Making</div>
+      <div class="pc-desc">Agents explain their reasoning. Humans can understand and challenge.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Black-box AI is unacceptable in enterprise. Explainability builds trust. Enables human override.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Agents provide thought process. Humans can trace logic. Sometimes requires human intervention.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Agent logs stored in PostgreSQL. Displayed in UI. Accessible in API response.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 7 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F39A;&#xFE0F; LLM Provider Abstraction</div>
+      <div class="pc-desc">Execution Service wraps any LLM. Customers never see the provider.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Avoids vendor lock-in. Enables model upgrades without API changes. Customer selects in Settings.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Small abstraction overhead (~5ms). Worth it for portability and customer autonomy.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Execution Service is the single point of LLM integration. All model calls flow through here.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 8 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F310; API-First Design</div>
+      <div class="pc-desc">Everything flows through the REST API. UI is just a client.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Enables SDK embedding. Powers integrations. Clear separation of concerns. Easier to scale.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Frontend must make API calls like any third-party client. Slight latency added. Massive architectural benefit.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Hono API server is the authority. UI calls only via REST + WebSocket. RBAC enforced at API layer.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 9 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F9EA; Proof Chain Verification</div>
+      <div class="pc-desc">Hash-chain validates context, directive, and artifacts at every step.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Prevents tampering. Documents what was used to make each decision. Enables audit and compliance.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">GitHub Actions verifies proof chain before human review. ~500ms added per merge. Standard practice.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">CI/CD pipeline validates proof chain. No merge without proof. Embedded in PR description.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 10 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F6A8; Governance Blocking Gates</div>
+      <div class="pc-desc">10 mandatory gates + 3 advisory signals. Examples: hallucination detection, PII scanning, security validation.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">What Gets Blocked</div>
+        <div class="pc-section-content">PII in code, hallucinated facts, insecure API calls, incomplete tests, code smells.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Advisory Signals</div>
+        <div class="pc-section-content">Giskard: hallucination score, prompt injection risk, sycophancy likelihood.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Governance Pipeline runs after CI passes. Blocks merge unless all gates pass. Human can override with justification.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 11 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4BE; Single Source of Truth</div>
+      <div class="pc-desc">PostgreSQL is the authority. Not git. Not a cache.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Eliminates sync drift. Simpler than bi-directional replication. nightly pg_dump to git for disaster recovery.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">No git-sync complexity. PostgreSQL as primary record. Trade-off: lose git history as source.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">All state changes write to PostgreSQL first. API queries PostgreSQL. Redis caches for performance.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 12 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4C8; Observability by Default</div>
+      <div class="pc-desc">Every agent call logged. Token usage tracked. Cost metered. Latency measured.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Enables cost control. Performance optimization. Troubleshooting. Fraud detection.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">~5 to 10% overhead for logging. Visible in dashboards. Cost transparency builds customer trust.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Logging middleware in API layer. Agent SDK integration. Real-time metrics in UI.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 13 -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F50C; Infrastructure Abstraction</div>
+      <div class="pc-desc">All infrastructure swappable. API contracts never change.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Upgrade without disruption. Try new technologies. Optimize infrastructure without touching API.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Clean API boundaries. Slightly thicker abstraction layers. Worth it for long-term flexibility.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Execution Service wraps LLM. Job queue is BullMQ today, swappable tomorrow. Database is PostgreSQL, swappable later.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 14 (NEW in v11) -->
+    <div class="principle-card">
+      <div class="pc-title">&#x2601;&#xFE0F; Cloud Native, Cloud Agnostic</div>
+      <div class="pc-desc">Requires Kubernetes, PostgreSQL, Redis, S3-compatible storage. Does not require any specific cloud provider.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Enterprise customers operate on different cloud providers. Government customers may require on-premises deployment. The platform must run anywhere Kubernetes runs.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">No proprietary cloud services in the critical path. All dependencies expressed as abstract contracts (e.g., "S3-compatible" not "AWS S3"). Slightly more operational complexity.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Cloud Abstraction Contract defines every infrastructure dependency as an interface. CI validates that no cloud-specific APIs are called directly.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 15 (NEW in v11) -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F3E2; Tenant Isolation Scales with Sensitivity</div>
+      <div class="pc-desc">Data boundaries enforced architecturally, not through application logic alone.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">SaaS customers need cost-effective isolation. Regulated enterprises need database-level separation. Government needs full infrastructure isolation. One model does not fit all.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Three isolation tiers with different cost and security profiles. Customers select the tier that matches their regulatory requirements. Operational complexity increases with tier.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Tier 1: Row Level Security in PostgreSQL. Tier 2: Dedicated database instances. Tier 3: Dedicated Kubernetes clusters. Enforced at infrastructure provisioning.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 16 (NEW in v11) -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F527; Configurable Workflow, Not Hardcoded Process</div>
+      <div class="pc-desc">The SDLC is a parameterised engine, not a fixed pipeline. Customers own their process definition.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Enterprise software processes vary widely. A startup needs agility. A bank needs governance. A government agency needs compliance. The workflow engine adapts to all of them.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Workflow definitions are JSON schemas. Default templates ship out of the box. Customers can modify phases, states, gates, and transition rules. Each project can override the org default.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Workflow Definition API validates schemas before activation. Visual Builder provides guardrails. Runtime enforces whatever the customer defines.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 17 (NEW in v12) -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F680; Supervised Autonomous Execution</div>
+      <div class="pc-desc">Agents can write and test code inside isolated sandboxes. Only humans can approve merges. Autonomy level configurable per workflow.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Closes the gap between governance and execution without sacrificing trust. Enterprise customers maintain control. The level of autonomy scales with organisational maturity.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Faster delivery (est. 40 to 60% reduction in cycle time). Requires developer trust building. Token cost increases 3x to 5x per story.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Workflow Engine controls autonomy level per template. Maximum iteration count enforced at sandbox level. Automatic escalation on repeated failures.</div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLE 18 (NEW in v12) -->
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4B0; Context Budget Awareness</div>
+      <div class="pc-desc">Every agent execution operates within a hard token budget. Context Compiler prioritises relevance within the ceiling.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Rationale</div>
+        <div class="pc-section-content">Context windows have practical limits even at 1M tokens. Without budget awareness, context quality degrades silently. Budget allocation ensures the most critical information always fits.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Impact</div>
+        <div class="pc-section-content">Prevents silent quality degradation. Adds ~200ms to context compilation. Enables cost predictability for metering.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Enforcement</div>
+        <div class="pc-section-content">Context Budget Manager calculates allocation before every execution. Hard ceiling enforced at Model Router. Overflow triggers prioritisation algorithm.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ TECHNOLOGY STACK ═══ -->
+<section class="section" id="stack">
+  <div class="section-lbl">Technology Stack</div>
+  <div class="section-title">What Powers The Arkitekt</div>
+  <div class="section-desc">Infrastructure components below the API boundary. All are open-source, swappable, and invisible to customers. Your API abstracts them completely. Cards marked BUILD are customer-facing IP; cards marked USE are hidden infrastructure.</div>
+  <div class="stack-grid">
+    <div class="stack-card" style="--sc-color:var(--blue)">
+      <div class="sc-layer">API Server</div>
+      <div class="sc-name">Hono on Node.js</div>
+      <div class="sc-tech">TypeScript &middot; Edge-ready</div>
+      <div class="sc-desc">Ultra-fast web framework. Handles all REST endpoints, WebSocket connections, and RBAC middleware. Validates every request against JWT tokens and role hierarchy.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--purple)">
+      <div class="sc-layer">Agent Runtime</div>
+      <div class="sc-name">Claude Agent SDK</div>
+      <div class="sc-tech">Subagents &middot; Parallel execution &middot; Context isolation</div>
+      <div class="sc-desc">Orchestrator agent spawns subagents for parallel work within a story. Each with isolated context windows. Subagents return only relevant results to parent. Built-in coordination.</div>
+      <div class="sc-badge new">New in v10</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--teal)">
+      <div class="sc-layer">Tool Orchestration</div>
+      <div class="sc-name">Programmatic Tool Calling</div>
+      <div class="sc-tech">Python sandbox &middot; Batch execution &middot; Token efficient</div>
+      <div class="sc-desc">Agent writes Python scripts orchestrating multiple tool calls in one shot. Scripts run in sandboxed Code Execution, pausing only for external tool results. Faster, cheaper, less token waste.</div>
+      <div class="sc-badge new">New in v10</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--amber)">
+      <div class="sc-layer">LLM Access</div>
+      <div class="sc-name">OpenRouter + Anthropic API</div>
+      <div class="sc-tech">Claude Sonnet 4 &middot; Haiku &middot; Opus 4.6</div>
+      <div class="sc-desc">Model router selects LLM per SDLC phase. OpenRouter for failover. Anthropic API direct for Agent SDK features. Real-time cost metering. 1M token context window.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--green)">
+      <div class="sc-layer">Job Queue</div>
+      <div class="sc-name">BullMQ on Redis</div>
+      <div class="sc-tech">Priority queues &middot; Exponential backoff &middot; Observability</div>
+      <div class="sc-desc">Persistent, production-grade job queue. Jobs survive server restarts. Native priority, retry, rate limiting, and Bull Board observability.</div>
+      <div class="sc-badge new">v6+</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--purple)">
+      <div class="sc-layer">Context Graph</div>
+      <div class="sc-name">PostgreSQL + pgvector</div>
+      <div class="sc-tech">Single source of truth &middot; 1536-dim embeddings &middot; ACID</div>
+      <div class="sc-desc">The sole authoritative source for the context graph. nightly pg_dump to git for disaster recovery. Eliminates git-sync complexity.</div>
+      <div class="sc-badge new">Major v6 change</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--cyan)">
+      <div class="sc-layer">Event Bus</div>
+      <div class="sc-name">Redis Streams</div>
+      <div class="sc-tech">Real-time &middot; Pub/Sub &middot; Persistent</div>
+      <div class="sc-desc">Every state machine transition emits an event. Powers real-time WebSocket updates to frontend. Kanban movement, approvals, activity indicators.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--orange)">
+      <div class="sc-layer">Sandbox</div>
+      <div class="sc-name">Alibaba OpenSandbox</div>
+      <div class="sc-tech">Multi-lang SDK &middot; Docker + Kubernetes &middot; Safe execution</div>
+      <div class="sc-desc">General-purpose sandbox for code execution. Unified SDK for lifecycle, commands, file ops. TypeScript SDK integrates with Hono. Kubernetes runtime for scale.</div>
+      <div class="sc-badge new">v10 addition</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--t3)">
+      <div class="sc-layer">Code Storage</div>
+      <div class="sc-name">GitHub</div>
+      <div class="sc-tech">PRs &middot; Actions &middot; Branch protection &middot; History</div>
+      <div class="sc-desc">Agents create PRs with proof chain metadata in description. GitHub Actions runs CI/CD with proof chain verification before human review.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--red)">
+      <div class="sc-layer">Secrets</div>
+      <div class="sc-name">HashiCorp Vault</div>
+      <div class="sc-tech">Encrypted at rest &middot; KV secrets &middot; Dev mode</div>
+      <div class="sc-desc">All API keys, tokens, and credentials encrypted. Agents access secrets through controlled path prefix. No secrets in code or prompts.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--purple-dim)">
+      <div class="sc-layer">Frontend</div>
+      <div class="sc-name">React + Tailwind + WebSocket</div>
+      <div class="sc-tech">Real-time &middot; Responsive &middot; Accessible</div>
+      <div class="sc-desc">Dashboard, Kanban, story detail, approvals, settings. WebSocket-powered real-time updates. Single unified view for all user types.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--amber)">
+      <div class="sc-layer">Binary Storage</div>
+      <div class="sc-name">S3-compatible (MinIO)</div>
+      <div class="sc-tech">Artifacts &middot; Screenshots &middot; Logs &middot; Scalable</div>
+      <div class="sc-desc">Stores agent-generated artifacts: screenshots, outputs, logs. Referenced by context graph. Kept separate from database for performance.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--green)">
+      <div class="sc-layer">CI/CD Pipeline</div>
+      <div class="sc-name">GitHub Actions</div>
+      <div class="sc-tech">Automated tests &middot; Proof chain validation &middot; PR checks</div>
+      <div class="sc-desc">Every PR triggers automated test suite and proof chain validation. CI verifies directive_ref, context_hash, and artifacts before human review.</div>
+      <div class="sc-badge v1">v1</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--cyan)">
+      <div class="sc-layer">Cross-Project</div>
+      <div class="sc-name">Dependency Graph</div>
+      <div class="sc-tech">depends_on &middot; Shared libraries &middot; Version tracking</div>
+      <div class="sc-desc">Stories can depend on stories from other projects. Context compiler fetches cross-project artifacts during brief assembly. Shared libraries pattern.</div>
+      <div class="sc-badge new">v3+ feature</div>
+    </div>
+    <div class="stack-card" style="--sc-color:#ff79c6">
+      <div class="sc-layer">Persistent Intelligence</div>
+      <div class="sc-name">Context Hub</div>
+      <div class="sc-tech">Project Memory &middot; Story Memory &middot; Code Index</div>
+      <div class="sc-desc">Accumulated intelligence persisting across executions. Project conventions, phase summaries, codebase fingerprints. No cold starts. Lock-in value.</div>
+      <div class="sc-badge new">v7+</div>
+    </div>
+    <div class="stack-card" style="--sc-color:var(--red)">
+      <div class="sc-layer">AI Governance</div>
+      <div class="sc-name">Giskard OSS</div>
+      <div class="sc-tech">LLM evaluation &middot; Hallucination detection &middot; Safety scanning</div>
+      <div class="sc-desc">Open-source evaluation library powering governance signals. Automated vulnerability detection: hallucinations, PII, injection, harmful content. ~$0.40 per scan.</div>
+      <div class="sc-badge new">v8+</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ AGENT TOOLBOX ═══ -->
+<section class="section" id="tools">
+  <div class="section-lbl">Agent Toolbox</div>
+  <div class="section-title">Nine Core Agent Tools</div>
+  <div class="section-desc">Agents are treated as team members: they read, write, and execute, but all analysis, reasoning, and decision-making requires human oversight. These tools form the complete action surface. v12 adds execute_code, connector_action, and explain_reasoning.</div>
+
+  <div style="padding:16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;margin-bottom:24px;font-size:12px;color:var(--t2);line-height:1.6">
+    <strong style="color:var(--t1)">Key Principle:</strong> Every tool requires human approval before final execution. Agents propose. Humans decide. This keeps humans in the loop and accountable for outcomes.
+  </div>
+
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-name">&#x1F4D6; read_file</div>
+      <div class="tool-desc">Read code, tests, docs from the codebase. Agents understand context before proposing changes.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Read-only. No approval required.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x270D;&#xFE0F; write_file</div>
+      <div class="tool-desc">Write code, docs, config files. Requires human approval before merge.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Proposal. Human approval via PR review.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F50D; context_graph_query</div>
+      <div class="tool-desc">Query the context hub for memory nodes, conventions, and codebase fingerprints.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Read-only. Informs agent reasoning.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F9EA; sandbox_exec</div>
+      <div class="tool-desc">Execute code in isolated sandbox. Test commands, compile, run scripts safely.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Isolated execution. No side effects to production.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F510; get_secret</div>
+      <div class="tool-desc">Retrieve API keys, tokens from Vault. Limited to path prefixes for current story.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Least privilege. Path-restricted access.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F4CA; log_metric</div>
+      <div class="tool-desc">Log metrics for observability. Track progress, costs, quality signals.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Append-only. Immutable audit trail.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F4BB; execute_code</div>
+      <div class="tool-desc">Execute code in sandbox, run tests, read CI results, iterate on failures. Requires human approval before merge.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Supervised execution. Human approval for merge.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F517; connector_action</div>
+      <div class="tool-desc">Execute bidirectional actions on external systems: create Jira tickets, trigger pipelines, merge PRs, restart pods.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Action manifest declares required approval level. Governance Pipeline validates before execution.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F4DD; explain_reasoning</div>
+      <div class="tool-desc">Generate explainability report for developer consumption. Documents reasoning chain, patterns referenced, design alignment, and iteration history.</div>
+      <div class="tool-gov"><strong>Governance:</strong> Append only. Attached to every PR and evidence pack.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION B: MODULAR AGENT AND EXTENSION SYSTEM ═══ -->
+<section class="section" id="modules">
+  <div class="section-lbl">Modular Agent and Extension System</div>
+  <div class="section-title">Plug and Play Module Architecture</div>
+  <div class="section-desc">The Arkitekt uses a modular architecture where specialised agents, tools, governance gates, and language runtimes can be added or removed per project without platform restart. Each module is versioned, containerised, and hot-swappable.</div>
+
+  <!-- Module System Architecture -->
+  <div style="padding:20px;background:linear-gradient(135deg,var(--purple-g),var(--teal-g));border:2px solid var(--purple-dim);border-radius:10px;margin-bottom:28px">
+    <div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px">&#x1F9E9; Module System Architecture</div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px">
+      The Module Registry is a versioned catalogue of all available modules. Each module declares its capabilities, dependencies, and governance requirements through a manifest. Modules are deployed as container images and can be added to any project at runtime. The framework supports 14 native module categories, 9 configurable categories, and 12 add-on categories from the use case roadmap.
+    </div>
+    <div style="font-family:var(--fm);font-size:10px;color:var(--t3)">Hot-swappable: adding a new agent module does not require platform restart. The Module Registry handles discovery, versioning, and deployment lifecycle.</div>
+  </div>
+
+  <!-- Module Categories -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px">Module Categories</div>
+  <div class="mod-category-grid">
+    <div class="mod-category" style="border-top:4px solid var(--purple)">
+      <div class="mc-icon">&#x1F916;</div>
+      <div class="mc-title">Agent Modules</div>
+      <div class="mc-desc">Specialised subagents that can be added or removed per project. Each agent module has domain expertise and a defined tool surface.</div>
+      <div class="mc-examples"><strong>Examples:</strong> Mobile Developer Agent, Data Engineer Agent, Infrastructure Agent, E2E Test Agent, Security Audit Agent, API Design Agent</div>
+    </div>
+    <div class="mod-category" style="border-top:4px solid var(--teal)">
+      <div class="mc-icon">&#x1F527;</div>
+      <div class="mc-title">Tool Connectors</div>
+      <div class="mc-desc">Pluggable tools with bidirectional capabilities that agents can use. Each tool has a manifest, a runtime, and governance metadata defining its permissions and audit requirements.</div>
+      <div class="mc-examples"><strong>Examples:</strong> Jira Connector (read + create), GitHub Connector (read + merge + actions), Slack Notifier, Datadog Metrics (read + alert), Terraform Executor, Database Migration Tool</div>
+    </div>
+    <div class="mod-category" style="border-top:4px solid var(--amber)">
+      <div class="mc-icon">&#x1F6AA;</div>
+      <div class="mc-title">Governance Gates</div>
+      <div class="mc-desc">Pluggable gates that can be added to any workflow transition. Custom validation, compliance checks, and approval rules as modular components.</div>
+      <div class="mc-examples"><strong>Examples:</strong> PDPL Compliance Gate, SOC2 Evidence Gate, License Scanner, Accessibility Checker, Performance Budget Gate</div>
+    </div>
+    <div class="mod-category" style="border-top:4px solid var(--green)">
+      <div class="mc-icon">&#x1F4E6;</div>
+      <div class="mc-title">Language Sandboxes</div>
+      <div class="mc-desc">Pluggable runtime environments for code execution. Node.js ships as the default. Additional languages available as add-on modules.</div>
+      <div class="mc-examples"><strong>Examples:</strong> Node.js (default), Python 3.12, Go 1.22, Java 21, Rust 1.77, .NET 8</div>
+    </div>
+  </div>
+
+  <!-- Module Manifest -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;margin-top:28px">Module Manifest Structure</div>
+  <div class="mod-manifest">
+    <pre>{
+  "module_id": "mobile-developer-agent",
+  "version": "2.1.0",
+  "type": "agent_module",
+  "name": "Mobile Developer Agent",
+  "description": "Specialised subagent for React Native mobile development",
+  "capabilities": [
+    "react_native_code_generation",
+    "mobile_ui_testing",
+    "platform_specific_builds",
+    "app_store_compliance_check"
+  ],
+  "dependencies": {
+    "platform": "arkitekt >= 0.8.0",
+    "tools": ["sandbox_exec", "write_file", "read_file"],
+    "sandboxes": ["nodejs"]
+  },
+  "governance": {
+    "required_gates": ["code_review", "security_scan"],
+    "audit_level": "full",
+    "data_classification": "internal"
+  },
+  "runtime": {
+    "image": "registry.arkitekt.io/agents/mobile-dev:2.1.0",
+    "resources": {
+      "cpu": "500m",
+      "memory": "1Gi"
+    }
+  },
+  "configuration_schema": {
+    "target_platforms": ["ios", "android"],
+    "min_sdk_version": 21,
+    "build_flavours": ["debug", "release"]
+  }
+}</pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ CODE EXECUTION LOOP (NEW in v12) ═══ -->
+<section class="section" id="codeloop">
+  <div class="section-lbl">Code Execution Loop</div>
+  <div class="section-title">From Approved Design to Governed Pull Request</div>
+  <div class="section-desc">The Code Execution Loop closes the critical gap between governance and code delivery. It takes approved design artifacts and autonomously generates, tests, and iterates code within governed boundaries. Humans review and approve the final output. New in v12.</div>
+
+  <!-- IP Callout -->
+  <div class="ip-callout">
+    <div class="ip-callout-title">&#x1F6E1;&#xFE0F; Principle Update: Supervised Autonomous Execution</div>
+    <div class="ip-callout-content">
+      v11 enforced Zero Autonomous Action as a blanket rule. v12 introduces Supervised Autonomous Execution: agents can write and test code inside isolated sandboxes, but only humans can approve the merge. This preserves governance while unlocking execution speed. The autonomy level is configurable per workflow template.
+    </div>
+  </div>
+
+  <!-- Flow Diagram -->
+  <div class="flow-container">
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">1</div>
+      <div class="flow-line"></div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">Design Artifact Approved</div>
+          <span class="flow-card-type human">Human</span>
+        </div>
+        <div class="flow-card-desc">Human approves the design at State 6 (Ready Dev). The approved design artifact, architecture decisions, and Context Hub patterns are assembled by the Context Compiler into an Executable Specification.</div>
+      </div>
+    </div>
+
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">2</div>
+      <div class="flow-line"></div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">Context Budget Allocation</div>
+          <span class="flow-card-type system">System</span>
+        </div>
+        <div class="flow-card-desc">Context Budget Manager calculates the optimal context window allocation. Prioritises: design artifact (40%), codebase understanding (25%), related patterns (20%), governance rules (15%). Hard ceiling prevents context overflow.</div>
+      </div>
+    </div>
+
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">3</div>
+      <div class="flow-line"></div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">Sandbox Code Generation</div>
+          <span class="flow-card-type agent">Agent</span>
+        </div>
+        <div class="flow-card-desc">Coding subagent spawns inside OpenSandbox. Generates code following the Executable Specification. Writes to feature branch. Each file change is traced in proof chain with reasoning explanation.</div>
+      </div>
+    </div>
+
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">4</div>
+      <div class="flow-line"></div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">CI/CD Validation</div>
+          <span class="flow-card-type system">System</span>
+        </div>
+        <div class="flow-card-desc">GitHub Actions triggered automatically. Runs unit tests, integration tests, linting, and security scans. CI results are read back into the agent context. SonarQube, CodeQL, and Snyk results feed into Governance Pipeline.</div>
+      </div>
+    </div>
+
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">5</div>
+      <div class="flow-line"></div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">Iteration or Escalation</div>
+          <span class="flow-card-type agent">Agent</span>
+        </div>
+        <div class="flow-card-desc">If CI fails: agent reads error output, diagnoses root cause, and generates fixes (maximum 5 iterations). If iteration limit exceeded: automatic escalation to human developer with full context and failure history.</div>
+      </div>
+    </div>
+
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">6</div>
+      <div class="flow-line"></div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">Explainability Report</div>
+          <span class="flow-card-type system">System</span>
+        </div>
+        <div class="flow-card-desc">Agent Explainability Layer generates PR documentation: reasoning chain, Context Hub patterns referenced, design artifact followed, governance gates passed, iteration history, and token consumption. Designed for developer consumption, not just audit.</div>
+      </div>
+    </div>
+
+    <div class="flow-step" onclick="this.classList.toggle('active')">
+      <div class="flow-num">7</div>
+      <div class="flow-card">
+        <div class="flow-card-hd">
+          <div class="flow-card-title">Human Review and Merge</div>
+          <span class="flow-card-type human">Human</span>
+        </div>
+        <div class="flow-card-desc">Developer reviews the PR with full explainability report. Can approve, request changes, or reject. Only after human approval does the code merge. Governance Pipeline validates proof chain before merge is permitted.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ OPERATE PHASE (NEW in v12) ═══ -->
+<section class="section" id="operate">
+  <div class="section-lbl">Operate Phase (New in v12)</div>
+  <div class="section-title">Delivery Does Not End at Ship</div>
+  <div class="section-desc">v12 extends the SDLC from 5 phases to 6. The Operate phase closes the lifecycle loop by governing runtime health, incident response, and operational learning. Forge does not replace monitoring tools. It governs the response.</div>
+
+  <!-- Phase Card -->
+  <div style="margin-bottom:32px">
+    <div class="pipeline-phase" style="max-width:400px;margin:0 auto 24px">
+      <div class="pp-num">6</div>
+      <div class="pp-title">Operate</div>
+      <div class="pp-desc">Runtime health monitored. Incidents detected and governed. Root cause analysed. Lessons captured in Context Hub. Operational memory compounds across releases.</div>
+      <div class="pp-artifacts">
+        <strong>Artifacts:</strong><br>&bull; Incident records<br>&bull; Root cause analysis<br>&bull; Runbook execution log<br>&bull; Operational KPIs<br>&bull; Lessons learned
+      </div>
+    </div>
+  </div>
+
+  <!-- Operate Kanban States -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px">Operate Phase Kanban States (18 to 22)</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:32px">
+    <div class="state-badge" title="Production health baseline established, telemetry flowing">18. Monitoring</div>
+    <div class="state-badge" title="Alert received from external monitoring, incident story created">19. Incident Detected</div>
+    <div class="state-badge" title="Root cause analysis in progress, evidence being gathered">20. Investigating</div>
+    <div class="state-badge" title="Fix approved and being deployed, rollback plan ready">21. Remediating</div>
+    <div class="state-badge" title="Incident resolved, lessons captured, Context Hub updated">22. Resolved</div>
+  </div>
+
+  <!-- Integration Model -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px">Integration, Not Replacement</div>
+  <div style="padding:20px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;font-size:12px;line-height:1.7;color:var(--t2)">
+    <p style="margin-bottom:12px">Forge consumes telemetry from external tools (Datadog, Grafana, CloudWatch, Azure Monitor, New Relic) through Tool Connectors (Layer 8). The monitoring tools detect the problem. Forge governs the response: who approves the rollback, what evidence is captured, what the root cause analysis says, how the lesson is stored in Context Hub.</p>
+    <p style="margin-bottom:12px">This avoids competing with established observability platforms while owning the governance narrative. Forge adds a governed workflow layer on top of monitoring signals, turning alerts into governed incident stories with evidence chains, approval gates, and operational memory.</p>
+    <p><strong style="color:var(--t1)">Key distinction:</strong> Monitoring tools answer "what happened." Forge governs "what we do about it" and "what we learn from it."</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ IDE INTEGRATION LAYER (NEW in v12) ═══ -->
+<section class="section" id="ide">
+  <div class="section-lbl">IDE Integration Layer (New in v12)</div>
+  <div class="section-title">Governance Context Inside the Developer's IDE</div>
+  <div class="section-desc">A thin extension layer that brings Forge's governance context into VS Code, JetBrains, and other IDEs. The extension is a client of the existing REST API and WebSocket endpoints. It does not replace AI coding tools. It provides governance awareness alongside them.</div>
+
+  <div class="ide-grid">
+    <div class="ide-card">
+      <div class="ic-title">&#x1F7E2; Gate Status Panel</div>
+      <div class="ic-desc">Shows current governance gate status for the active story. Green/amber/red indicators. Approval queue count. Evidence completion percentage.</div>
+    </div>
+    <div class="ide-card">
+      <div class="ic-title">&#x1F4DA; Context Hub Sidebar</div>
+      <div class="ic-desc">Surfaces related patterns, prior implementations, and design decisions from Context Hub. Ranked by relevance to the current file being edited.</div>
+    </div>
+    <div class="ide-card">
+      <div class="ic-title">&#x1F517; Proof Chain Tracker</div>
+      <div class="ic-desc">Real time proof chain status. Shows which evidence is complete and what gaps remain. Links to Forge web UI for detailed view.</div>
+    </div>
+    <div class="ide-card">
+      <div class="ic-title">&#x2705; Approval Actions</div>
+      <div class="ic-desc">Bidirectional capability (v2): approve or reject gates directly from the IDE. Same RBAC and JWT auth as web UI. Audit trail maintained.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;padding:16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;font-size:12px;color:var(--t2);line-height:1.6">
+    <strong style="color:var(--t1)">Architecture Note:</strong> The extension calls the same Hono REST API and WebSocket endpoints as the web UI. No new backend services required. RBAC middleware and JWT auth at Layer 2 already support this.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION C: MULTI-TENANCY AND TENANT ISOLATION ═══ -->
+<section class="section" id="tenancy">
+  <div class="section-lbl">Multi-Tenancy and Tenant Isolation</div>
+  <div class="section-title">Three Isolation Tiers for Every Customer Profile</div>
+  <div class="section-desc">Tenant isolation scales with data sensitivity. SaaS customers get cost-effective logical isolation. Regulated enterprises get dedicated databases. Government gets full infrastructure separation. All three tiers run on the same platform codebase.</div>
+
+  <div class="tenant-tier-grid">
+    <div class="tenant-tier">
+      <div class="tt-badge t1">Tier 1</div>
+      <div class="tt-title">Logical Isolation</div>
+      <div class="tt-desc">Single shared infrastructure with strong logical boundaries. Cost-effective for SaaS customers who need standard data protection without dedicated resources.</div>
+      <div class="tt-specs">
+        <strong>PostgreSQL:</strong> Single cluster, Row Level Security (RLS) per tenant<br>
+        <strong>Redis:</strong> Keyspace prefix isolation per tenant<br>
+        <strong>S3:</strong> Path partition per tenant (tenant_id/...)<br>
+        <strong>Vault:</strong> Shared namespace with path-based access control<br>
+        <strong>Kubernetes:</strong> Shared cluster, namespace isolation<br><br>
+        <strong>Best for:</strong> Startups, small teams, standard SaaS customers
+      </div>
+    </div>
+    <div class="tenant-tier">
+      <div class="tt-badge t2">Tier 2</div>
+      <div class="tt-title">Database Isolation</div>
+      <div class="tt-desc">Shared compute with dedicated data stores. For regulated enterprises that need stronger data boundaries without the cost of full infrastructure isolation.</div>
+      <div class="tt-specs">
+        <strong>PostgreSQL:</strong> Dedicated instance per tenant<br>
+        <strong>Redis:</strong> Dedicated Redis instance per tenant<br>
+        <strong>S3:</strong> Dedicated bucket per tenant<br>
+        <strong>Vault:</strong> Dedicated namespace per tenant<br>
+        <strong>Kubernetes:</strong> Shared cluster, dedicated namespaces<br><br>
+        <strong>Best for:</strong> Regulated enterprises, financial institutions, healthcare
+      </div>
+    </div>
+    <div class="tenant-tier">
+      <div class="tt-badge t3">Tier 3</div>
+      <div class="tt-title">Full Infrastructure Isolation</div>
+      <div class="tt-desc">Completely dedicated deployment. Every component runs in isolation. For government agencies and organisations with the highest security and compliance requirements.</div>
+      <div class="tt-specs">
+        <strong>PostgreSQL:</strong> Dedicated cluster<br>
+        <strong>Redis:</strong> Dedicated cluster<br>
+        <strong>S3:</strong> Dedicated storage account<br>
+        <strong>Vault:</strong> Dedicated Vault instance<br>
+        <strong>Kubernetes:</strong> Dedicated cluster<br>
+        <strong>Network:</strong> Dedicated VPC/VNet<br><br>
+        <strong>Best for:</strong> Government, military, critical national infrastructure
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION D: CLOUD NATIVE, CLOUD AGNOSTIC DEPLOYMENT ═══ -->
+<section class="section" id="cloud">
+  <div class="section-lbl">Cloud Native, Cloud Agnostic Deployment</div>
+  <div class="section-title">Run Anywhere Kubernetes Runs</div>
+  <div class="section-desc">The Arkitekt requires Kubernetes and a set of open-standard dependencies. It does not require any specific cloud provider. Three deployment patterns cover every customer scenario from managed cloud to fully air-gapped installations.</div>
+
+  <div class="deploy-pattern-grid">
+    <div class="deploy-pattern" style="border-top:4px solid var(--blue)">
+      <div class="dp-label">Pattern A</div>
+      <div class="dp-title">Managed Kubernetes</div>
+      <div class="dp-desc">Deploy on any managed Kubernetes service from a major hyperscaler. Lowest operational overhead. The platform team manages the application; the cloud provider manages the infrastructure. Supports GKE, EKS, AKS, or any CNCF conformant managed offering.</div>
+    </div>
+    <div class="deploy-pattern" style="border-top:4px solid #8B5CF6">
+      <div class="dp-label">Pattern B</div>
+      <div class="dp-title">Self-Managed Kubernetes</div>
+      <div class="dp-desc">Deploy on customer-managed Kubernetes in private cloud or on premises. Suitable for organisations with existing Kubernetes expertise and infrastructure. Supports vanilla Kubernetes, OpenShift, and Rancher distributions.</div>
+    </div>
+    <div class="deploy-pattern" style="border-top:4px solid var(--green)">
+      <div class="dp-label">Pattern C</div>
+      <div class="dp-title">Air-Gapped Deployment</div>
+      <div class="dp-desc">Fully disconnected deployment with no external network access. Local model inference replaces cloud LLM APIs. Private container registry. All dependencies bundled. For government and classified environments.</div>
+    </div>
+  </div>
+
+  <!-- Cloud Abstraction Contract Table -->
+  <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px">Cloud Abstraction Contract</div>
+  <table class="cloud-table">
+    <thead>
+      <tr>
+        <th>Capability</th>
+        <th>Contract</th>
+        <th>Examples</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Container Orchestration</strong></td>
+        <td>Kubernetes 1.28+ CNCF conformant</td>
+        <td>GKE, EKS, AKS, OpenShift, Rancher</td>
+      </tr>
+      <tr>
+        <td><strong>Relational Database</strong></td>
+        <td>PostgreSQL 15+ with pgvector</td>
+        <td>Cloud SQL, RDS, Azure DB, CloudNativePG</td>
+      </tr>
+      <tr>
+        <td><strong>Cache and Messaging</strong></td>
+        <td>Redis 7+</td>
+        <td>Memorystore, ElastiCache, Bitnami chart</td>
+      </tr>
+      <tr>
+        <td><strong>Object Storage</strong></td>
+        <td>S3-compatible API</td>
+        <td>S3, Cloud Storage, Azure Blob, MinIO</td>
+      </tr>
+      <tr>
+        <td><strong>Secret Management</strong></td>
+        <td>HashiCorp Vault or compatible</td>
+        <td>Vault OSS, Vault Enterprise, HCP Vault</td>
+      </tr>
+      <tr>
+        <td><strong>Container Registry</strong></td>
+        <td>OCI compliant</td>
+        <td>GCR, ECR, ACR, Harbor</td>
+      </tr>
+      <tr>
+        <td><strong>CI/CD</strong></td>
+        <td>GitHub Actions or compatible</td>
+        <td>GitHub, GitLab CI, Jenkins</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION E: DISASTER RECOVERY AND BUSINESS CONTINUITY ═══ -->
+<section class="section" id="dr">
+  <div class="section-lbl">Disaster Recovery and Business Continuity</div>
+  <div class="section-title">RPO Under 5 Minutes. RTO Under 30 Minutes.</div>
+  <div class="section-desc">The Arkitekt is designed for enterprise-grade availability with defined recovery targets, automated failover, and multi-zone resilience at every layer of the stack.</div>
+
+  <div class="dr-metric-grid">
+    <div class="dr-metric" style="border-top:4px solid var(--purple)">
+      <div class="dm-value">&lt;5m</div>
+      <div class="dm-label">RPO Target</div>
+      <div class="dm-desc">Recovery Point Objective. WAL shipping ensures near-zero data loss. Maximum 5 minutes of data at risk.</div>
+    </div>
+    <div class="dr-metric" style="border-top:4px solid var(--teal)">
+      <div class="dm-value">&lt;30m</div>
+      <div class="dm-label">Platform RTO</div>
+      <div class="dm-desc">Full platform recovery including all services, queues, and API endpoints. Complete restoration within 30 minutes.</div>
+    </div>
+    <div class="dr-metric" style="border-top:4px solid var(--amber)">
+      <div class="dm-value">&lt;15m</div>
+      <div class="dm-label">Database Failover</div>
+      <div class="dm-desc">Database failover to standby replica. Automated promotion via Patroni (self-managed) or cloud provider HA (managed).</div>
+    </div>
+    <div class="dr-metric" style="border-top:4px solid var(--green)">
+      <div class="dm-value">Nightly</div>
+      <div class="dm-label">Cold Backup</div>
+      <div class="dm-desc">Nightly pg_dump as tertiary cold backup. Stored in separate region. Last resort recovery for catastrophic scenarios.</div>
+    </div>
+  </div>
+
+  <!-- DR Architecture Cards -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4BE; Database HA</div>
+      <div class="pc-desc">PostgreSQL streaming replication with automated failover.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Self-Managed</div>
+        <div class="pc-section-content">Patroni manages PostgreSQL cluster with streaming replication. Automatic leader election. Zero-downtime failover to synchronous standby.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Cloud Managed</div>
+        <div class="pc-section-content">Cloud provider HA (Cloud SQL HA, RDS Multi-AZ, Azure HA). Automated failover managed by the provider. Same RPO/RTO guarantees.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="pc-title">&#x26A1; Redis Resilience</div>
+      <div class="pc-desc">AOF persistence plus cross-zone replication.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Persistence</div>
+        <div class="pc-section-content">Append-Only File (AOF) persistence enabled. fsync every second. Maximum 1 second of queue data at risk on node failure.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Replication</div>
+        <div class="pc-section-content">Redis replica in separate availability zone. Sentinel or cloud-managed failover. BullMQ jobs survive node loss.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4C1; Artifact Storage</div>
+      <div class="pc-desc">Multi-zone replication for all binary artifacts.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Replication</div>
+        <div class="pc-section-content">S3-compatible storage configured for multi-zone replication. All agent artifacts, screenshots, and build outputs protected against zone failure.</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Versioning</div>
+        <div class="pc-section-content">Object versioning enabled. Point-in-time recovery for any artifact. Lifecycle policies for cost management.</div>
+      </div>
+    </div>
+    <div class="principle-card">
+      <div class="pc-title">&#x1F4CB; Recovery Runbook</div>
+      <div class="pc-desc">Defined recovery order with dependency mapping.</div>
+      <div class="pc-section">
+        <div class="pc-section-label">Recovery Order</div>
+        <div class="pc-section-content">1. PostgreSQL (data foundation) 2. Vault (secrets) 3. Redis (queues and events) 4. API Server (service endpoints) 5. Agent Runtime (execution) 6. Frontend (UI)</div>
+      </div>
+      <div class="pc-section">
+        <div class="pc-section-label">Validation</div>
+        <div class="pc-section-content">Health check endpoints validate each component before proceeding. Automated runbook execution via Kubernetes operators. Manual override available.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION F: TENANT LIFECYCLE AND PROVISIONING ═══ -->
+<section class="section" id="lifecycle">
+  <div class="section-lbl">Tenant Lifecycle and Provisioning</div>
+  <div class="section-title">From Signup to Production in Minutes</div>
+  <div class="section-desc">The tenant lifecycle covers provisioning, configuration, metering, and white-label embedding. Each capability is automated and API-driven, enabling self-service for SaaS customers and managed onboarding for enterprise deployments.</div>
+
+  <div class="lifecycle-grid">
+    <div class="lifecycle-card" style="border-top:4px solid var(--purple)">
+      <div class="lc-icon">&#x1F3D7;&#xFE0F;</div>
+      <div class="lc-title">Provisioning</div>
+      <div class="lc-desc">Creates tenant context based on isolation tier: schema (Tier 1), database instance (Tier 2), or full cluster (Tier 3). Provisions Vault namespace, admin user, RBAC defaults, and LLM budget limits. Automated via Kubernetes operators for Tier 1 and 2; infrastructure-as-code for Tier 3.</div>
+    </div>
+    <div class="lifecycle-card" style="border-top:4px solid var(--teal)">
+      <div class="lc-icon">&#x2699;&#xFE0F;</div>
+      <div class="lc-title">Configuration</div>
+      <div class="lc-desc">Customer-specific settings applied post-provisioning: LLM provider preferences (Claude, GPT, local models), governance gate thresholds, proof chain retention period, deployment targets, and workflow template selection. All configurable via API or Settings UI.</div>
+    </div>
+    <div class="lifecycle-card" style="border-top:4px solid var(--amber)">
+      <div class="lc-icon">&#x1F4CA;</div>
+      <div class="lc-title">Metering and Billing</div>
+      <div class="lc-desc">Every API call, agent execution, and token consumed is metered at tenant level. The Metering Pipeline aggregates usage events from Redis Streams into billing tables. Distinguishes dashboard usage, API usage, and SDK usage for transparent billing breakdowns. v12 addition: execution metering tracks autonomous coding iterations, sandbox compute time, and CI/CD runs per story. Pricing models supported: per story, per agent execution, per token tier, or flat rate with execution caps. Metering Pipeline distinguishes governance usage from execution usage for transparent billing.</div>
+    </div>
+    <div class="lifecycle-card" style="border-top:4px solid var(--green)">
+      <div class="lc-icon">&#x1F3A8;</div>
+      <div class="lc-title">White Label</div>
+      <div class="lc-desc">Branding configuration for system integrator embedding: custom logo, colour scheme, domain mapping (CNAME), and email templates. Enables partners to offer The Arkitekt under their own brand with full UI customisation.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION G: API VERSIONING AND SDK LIFECYCLE ═══ -->
+<section class="section" id="apiver">
+  <div class="section-lbl">API Versioning and SDK Lifecycle</div>
+  <div class="section-title">Stable APIs. Predictable Deprecation. Semantic Versioning.</div>
+  <div class="section-desc">The Arkitekt follows strict API versioning and SDK lifecycle policies to ensure customers can build confidently on the platform without fear of breaking changes.</div>
+
+  <div class="api-ver-grid">
+    <div class="api-ver-card">
+      <div class="avc-title">&#x1F4E1; URL-Based Versioning</div>
+      <div class="avc-desc">All API endpoints are versioned in the URL path: <code style="font-family:var(--fm);font-size:11px;color:var(--purple);background:var(--s2);padding:2px 5px;border-radius:3px">/api/v1/</code>, <code style="font-family:var(--fm);font-size:11px;color:var(--purple);background:var(--s2);padding:2px 5px;border-radius:3px">/api/v2/</code>, etc. Major version increments indicate breaking changes. Minor and patch changes are backward-compatible within a major version. All versions run concurrently during overlap periods.</div>
+    </div>
+    <div class="api-ver-card">
+      <div class="avc-title">&#x1F4C5; Version Lifecycle</div>
+      <div class="avc-desc">Each API major version is supported for a minimum of 18 months after the next major version is released. Deprecation notices are published 6 months before end of support. Customers receive automated migration guides and API diff reports when a new major version is available.</div>
+    </div>
+    <div class="api-ver-card">
+      <div class="avc-title">&#x1F4E6; SDK Semantic Versioning</div>
+      <div class="avc-desc">TypeScript and Python SDKs follow semantic versioning (SemVer). A compatibility matrix maps SDK versions to supported API versions. Breaking SDK changes increment the major version. SDKs include TypeScript type definitions and Python type hints for IDE support.</div>
+    </div>
+    <div class="api-ver-card">
+      <div class="avc-title">&#x1F4DD; Machine-Readable Changelogs</div>
+      <div class="avc-desc">Every API version publishes an OpenAPI spec. Differences between versions are available as machine-readable OpenAPI diffs. CI/CD pipelines can validate client compatibility against the latest API spec. SDK changelogs follow Keep a Changelog format.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ NEW SECTION H: COMPLIANCE EVIDENCE EXPORT ═══ -->
+<section class="section" id="compliance">
+  <div class="section-lbl">Compliance Evidence Export</div>
+  <div class="section-title">Audit-Ready Evidence at the Push of a Button</div>
+  <div class="section-desc">The Evidence Pack Generator compiles state transitions, proof chain records, gate results, PII scan results, test coverage, and cost summaries into export packages formatted for regulatory submission, GRC platform integration, or manual audit review.</div>
+
+  <div class="compliance-grid">
+    <div class="compliance-card" style="border-top:4px solid var(--purple)">
+      <div class="cc-icon">&#x1F4C4;</div>
+      <div class="cc-title">Evidence Pack Generator</div>
+      <div class="cc-desc">Compiles all governance artifacts for a project, sprint, or time range: state transitions, proof chain entries, gate pass/fail results, PII scan findings, test coverage metrics, and LLM cost summaries. One-click export or scheduled generation via BullMQ.</div>
+    </div>
+    <div class="compliance-card" style="border-top:4px solid var(--teal)">
+      <div class="cc-icon">&#x1F4CA;</div>
+      <div class="cc-title">Export Formats</div>
+      <div class="cc-desc">Three output formats: PDF for regulatory submission with branded cover pages and executive summaries, JSON for GRC platform integration (ServiceNow, Archer, OneTrust), and CSV for audit spreadsheet workflows. All formats include the same complete evidence data.</div>
+    </div>
+    <div class="compliance-card" style="border-top:4px solid var(--amber)">
+      <div class="cc-icon">&#x1F4CB;</div>
+      <div class="cc-title">Regulatory Templates</div>
+      <div class="cc-desc">Pre-built templates for common regulatory frameworks: PDPL compliance report, NDMO alignment report, SOC2 evidence pack, ISO 27001 control mapping. Templates are configurable per tenant for white-label branding and custom regulatory requirements.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+    <div class="tool-card">
+      <div class="tool-name">&#x23F0; Scheduled Exports</div>
+      <div class="tool-desc">Configure recurring evidence exports via BullMQ job scheduler. Weekly compliance reports, monthly audit packs, or quarterly regulatory submissions. All automated.</div>
+      <div class="tool-gov"><strong>Trigger:</strong> Scheduled (cron) or event-driven (sprint completion, release).</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">&#x1F3A8; White-Label Branding</div>
+      <div class="tool-desc">Evidence packs use tenant branding: custom logo, colour scheme, company name, and contact details. System integrators can embed compliance exports in their own reporting workflows.</div>
+      <div class="tool-gov"><strong>Configuration:</strong> Per tenant, via Settings API or UI.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FOOTER -->
+<section class="section" style="text-align:center;color:var(--t3);font-family:var(--fm);font-size:11px;padding:40px 32px">
+  <div style="max-width:600px;margin:0 auto">
+    <p style="margin-bottom:16px">The Arkitekt: Agentic OS Deep Architecture v12</p>
+    <p style="margin-bottom:16px;font-size:10px;color:var(--t3)">Light theme &middot; ARKITEKT brand colors &middot; Multi-audience architecture view &middot; April 2026</p>
+    <p style="font-size:10px">This document is designed for enterprise architecture discussions, customer presentations, and strategic planning. All information is structured for easy navigation by different architectural roles.</p>
+  </div>
+</section>
+
+<script>
+function scrollTo_(id) {
+  const elem = document.getElementById(id);
+  if (elem) {
+    const nav = document.querySelector('.nav');
+    const offset = nav.offsetHeight + 60;
+    const top = elem.offsetTop - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+
+    // Update active nav link
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+}
+
+function setAudience(audience) {
+  document.querySelectorAll('.audience-tab').forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  console.log('Viewing as:', audience);
+}
+
+function setDiscipline(discipline) {
+  document.querySelectorAll('.discipline-tab').forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  console.log('Filtered by:', discipline);
+}
+
+function toggleLayer(elem) {
+  elem.classList.toggle('expanded');
+}
+</script>
+
+</body>
+</html>
