@@ -335,6 +335,12 @@ function ArtifactCard({
       {/* Regenerate prompt — mandatory for rejected status */}
       {showRegeneratePrompt && (
         <div className="mt-3 space-y-2">
+          {artifact?.rejectionReason && (
+            <div className="rounded-[8px] bg-red-50 border border-red-200 px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-red-500 mb-1">Your rejection comment</p>
+              <p className="text-[12px] text-red-800 leading-5">{artifact.rejectionReason}</p>
+            </div>
+          )}
           <p className="text-[11px] font-medium text-slate-600">What should the AI fix?</p>
           <textarea
             value={regenerateContext}
