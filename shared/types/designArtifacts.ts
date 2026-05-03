@@ -1,3 +1,12 @@
+export interface ReviewEntry {
+  id: string;
+  artifactId: string;
+  type: 'rejected' | 'regenerated' | 'approved' | 'comment';
+  message: string;
+  author: string;
+  timestamp: string;
+}
+
 export type ProjectArtifactStatus =
   | 'not_generated'
   | 'generating'
@@ -53,6 +62,7 @@ export interface ProjectDesignArtifact {
   approvedBy?: string;
   rejectedAt?: string;
   rejectionReason?: string;
+  reviewThread?: ReviewEntry[];
   proofHash?: string;
   version: number;
 }
@@ -71,6 +81,7 @@ export interface EpicDesignArtifact {
   approvedBy?: string;
   rejectedAt?: string;
   rejectionReason?: string;
+  reviewThread?: ReviewEntry[];
   proofHash?: string;
   version: number;
 }

@@ -10,7 +10,11 @@ import {
   ThumbsDown,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
+  Check,
+  X,
 } from "lucide-react";
+import type { ReviewEntry } from "@shared/types/designArtifacts";
 import { cn } from "@/lib/utils";
 import { XYFlowDiagram } from "./XYFlowDiagram";
 import { PlantUMLDiagram } from "./PlantUMLDiagram";
@@ -35,7 +39,7 @@ import type { ProjectDesignArtifact, EpicDesignArtifact } from "@shared/types/de
 
 interface Props {
   story: Story;
-  onGenerate: (typeId: ArtifactTypeId) => void;
+  onGenerate: (typeId: ArtifactTypeId, regenerationContext?: string) => void;
   onApprove: (typeId: ArtifactTypeId) => void;
   onReject: (typeId: ArtifactTypeId, reason: string) => void;
   projectArtifacts?: ProjectDesignArtifact[];
@@ -133,7 +137,7 @@ function ArtifactCard({
 }: {
   typeId: ArtifactTypeId;
   storyDesignArtifacts: Partial<Record<ArtifactTypeId, StoryDesignArtifact>>;
-  onGenerate: (id: ArtifactTypeId) => void;
+  onGenerate: (id: ArtifactTypeId, regenerationContext?: string) => void;
   onApprove: (id: ArtifactTypeId) => void;
   onReject: (id: ArtifactTypeId, reason: string) => void;
 }) {
@@ -145,6 +149,8 @@ function ArtifactCard({
   const [expanded, setExpanded] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [showRegeneratePrompt, setShowRegeneratePrompt] = useState(false);
+  const [regenerateContext, setRegenerateContext] = useState("");
 
   const missingPrereqs = status === "locked"
     ? config.prerequisites.filter(p => {
@@ -152,6 +158,13 @@ function ArtifactCard({
         return !pr || pr.status !== "approved";
       }).map(p => getArtifactConfig(p).label)
     : [];
+
+  const handleRegenerateSubmit = () => {
+    if (!regenerateContext.trim()) return;
+    onGenerate(typeId, regenerateContext.trim());
+    setShowRegeneratePrompt(false);
+    setRegenerateContext("");
+  };
 
   return (
     <div className={cn("rounded-[16px] border p-4 transition-all", sc.border, sc.bg)}>
@@ -201,15 +214,8 @@ function ArtifactCard({
         </p>
       )}
 
-      {/* Rejection reason */}
-      {status === "rejected" && artifact?.rejectionReason && (
-        <p className="mt-2 text-[11px] text-red-600 italic">
-          Reason: {artifact.rejectionReason}
-        </p>
-      )}
-
       {/* Actions */}
-      {!rejecting && (
+      {!rejecting && !showRegeneratePrompt && (
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           {status === "available" && (
             <button
@@ -220,10 +226,10 @@ function ArtifactCard({
               Generate with AI
             </button>
           )}
-          {(status === "rejected" || status === "approved") && (
+          {status === "rejected" && (
             <button
-              onClick={() => onGenerate(typeId)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 transition"
+              onClick={() => { setShowRegeneratePrompt(true); setRegenerateContext(""); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-sky-300 bg-sky-50 px-3 py-1.5 text-[11px] font-semibold text-sky-700 hover:bg-sky-100 transition"
             >
               <RefreshCw className="size-3" />
               Regenerate
@@ -254,6 +260,7 @@ function ArtifactCard({
               </button>
             </>
           )}
+          {/* approved: no Regenerate — must reject first */}
           {(status === "draft" || status === "approved" || status === "rejected") && artifact?.content && (
             <button
               onClick={() => setExpanded(e => !e)}
@@ -304,12 +311,116 @@ function ArtifactCard({
         </div>
       )}
 
+      {/* Regenerate prompt — mandatory for rejected status */}
+      {showRegeneratePrompt && (
+        <div className="mt-3 space-y-2">
+          <p className="text-[11px] font-medium text-slate-600">What should the AI fix?</p>
+          <textarea
+            value={regenerateContext}
+            onChange={e => setRegenerateContext(e.target.value)}
+            placeholder="Describe what needs to be corrected in the next version..."
+            rows={2}
+            autoFocus
+            className="w-full resize-none rounded-[10px] border border-sky-200 bg-white px-3 py-2 text-xs leading-5 text-slate-900 placeholder:text-slate-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleRegenerateSubmit}
+              disabled={!regenerateContext.trim()}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition",
+                regenerateContext.trim()
+                  ? "border-sky-600 bg-sky-600 text-white hover:bg-sky-700"
+                  : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+              )}
+            >
+              <RefreshCw className="size-3 inline mr-1" />
+              Regenerate
+            </button>
+            <button
+              onClick={() => setShowRegeneratePrompt(false)}
+              className="rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Content viewer */}
       {expanded && artifact?.content && (
         <div className="mt-4 rounded-[12px] border border-slate-100 bg-white p-4">
           {renderArtifactContent(artifact, config)}
         </div>
       )}
+
+      {/* Review thread */}
+      {artifact?.reviewThread && artifact.reviewThread.length > 0 && (
+        <ReviewThread entries={artifact.reviewThread} />
+      )}
+    </div>
+  );
+}
+
+function ReviewThread({ entries }: { entries: ReviewEntry[] }) {
+  const [expanded, setExpanded] = useState(false);
+  if (entries.length === 0) return null;
+  const shown = expanded ? entries : entries.slice(-2);
+  const hidden = entries.length - shown.length;
+
+  const icon = (type: ReviewEntry["type"]) => {
+    if (type === "approved")    return <Check className="size-3 text-emerald-600 shrink-0 mt-0.5" />;
+    if (type === "rejected")    return <X className="size-3 text-red-500 shrink-0 mt-0.5" />;
+    if (type === "regenerated") return <RefreshCw className="size-3 text-sky-500 shrink-0 mt-0.5" />;
+    return <MessageSquare className="size-3 text-slate-400 shrink-0 mt-0.5" />;
+  };
+
+  const dot = (type: ReviewEntry["type"]) => {
+    if (type === "approved")    return "bg-emerald-500";
+    if (type === "rejected")    return "bg-red-400";
+    if (type === "regenerated") return "bg-sky-500";
+    return "bg-slate-300";
+  };
+
+  return (
+    <div className="mt-3 border-t border-slate-100 pt-3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-400">Review History</span>
+        {entries.length > 2 && (
+          <button onClick={() => setExpanded(e => !e)} className="text-[10px] text-sky-600 hover:underline">
+            {expanded ? "Show less" : `Show all (${entries.length})`}
+          </button>
+        )}
+      </div>
+      <div className="space-y-2">
+        {hidden > 0 && !expanded && (
+          <p className="text-[10px] text-slate-400 italic pl-4">{hidden} earlier {hidden === 1 ? "entry" : "entries"} hidden</p>
+        )}
+        {shown.map(entry => (
+          <div key={entry.id} className="flex gap-2">
+            <div className="flex flex-col items-center">
+              <div className={cn("size-1.5 rounded-full mt-1 shrink-0", dot(entry.type))} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {icon(entry.type)}
+                <span className="text-[10px] font-semibold text-slate-600">{entry.author}</span>
+                <span className={cn("text-[10px] font-medium capitalize",
+                  entry.type === "approved" ? "text-emerald-600" :
+                  entry.type === "rejected" ? "text-red-500" :
+                  entry.type === "regenerated" ? "text-sky-600" : "text-slate-500"
+                )}>{entry.type}</span>
+                <span className="text-[10px] text-slate-400 ml-auto">
+                  {new Date(entry.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+              {entry.type !== "approved" && entry.message && (
+                <p className="text-[10px] text-slate-500 italic mt-0.5 leading-4">"{entry.message}"</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

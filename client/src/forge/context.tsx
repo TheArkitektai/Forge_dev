@@ -138,7 +138,7 @@ type ForgeContextValue = {
   approveDesignArtifact: (artifactId: string, reason?: string) => void;
   rejectDesignArtifact: (artifactId: string, reason: string) => void;
   addDesignFeedback: (artifactId: string, text: string) => void;
-  generateDesignArtifact: (storyId: string, typeId: import("@/forge/types").ArtifactTypeId) => void;
+  generateDesignArtifact: (storyId: string, typeId: import("@/forge/types").ArtifactTypeId, regenerationContext?: string) => void;
   approveStoryDesignArtifact: (storyId: string, typeId: import("@/forge/types").ArtifactTypeId) => void;
   rejectStoryDesignArtifact: (storyId: string, typeId: import("@/forge/types").ArtifactTypeId, reason: string) => void;
   importStoriesFromCandidates: (candidates: ExtractedStoryCandidate[]) => void;
@@ -152,10 +152,10 @@ type ForgeContextValue = {
   projectDesignArtifacts: ProjectDesignArtifact[];
   epicDesignArtifacts: EpicDesignArtifact[];
   createEpic: (name: string, description?: string) => void;
-  generateProjectArtifact: (projectId: string, typeId: string) => void;
+  generateProjectArtifact: (projectId: string, typeId: string, regenerationContext?: string) => void;
   approveProjectArtifact: (artifactId: string) => void;
   rejectProjectArtifact: (artifactId: string, reason: string) => void;
-  generateEpicArtifact: (epicId: string, typeId: string) => void;
+  generateEpicArtifact: (epicId: string, typeId: string, regenerationContext?: string) => void;
   approveEpicArtifact: (artifactId: string) => void;
   rejectEpicArtifact: (artifactId: string, reason: string) => void;
 };
@@ -495,7 +495,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     toast.success("Feedback added to design artifact.");
   }, []);
 
-  const generateDesignArtifact = useCallback((storyId: string, typeId: ArtifactTypeId) => {
+  const generateDesignArtifact = useCallback((storyId: string, typeId: ArtifactTypeId, regenerationContext?: string) => {
     const story = storyList.find(s => s.id === storyId);
     if (!story) return;
 
@@ -512,14 +512,43 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Mark as generating
+    const existing = currentArtifacts[typeId];
+    const isRegeneration = !!existing;
+    const threadEntry = isRegeneration ? {
+      id: generateId(),
+      artifactId: `${storyId}-${typeId}`,
+      type: "regenerated" as const,
+      message: regenerationContext ?? "Regenerated",
+      author: currentUser.name,
+      timestamp: new Date().toISOString(),
+    } : null;
+
+    if (threadEntry && regenerationContext) {
+      addAuditEvent({
+        type: "ai-action",
+        title: `${config.label} regenerated`,
+        detail: regenerationContext,
+        actor: currentUser.name,
+        actorRole: currentUser.role,
+        timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        proofHash: generateId(),
+      });
+    }
+
+    // Mark as generating, preserving thread
     setStoryList(prev => prev.map(s => {
       if (s.id !== storyId) return s;
+      const prev_artifact = s.storyDesignArtifacts?.[typeId];
       return {
         ...s,
         storyDesignArtifacts: {
           ...s.storyDesignArtifacts,
-          [typeId]: { typeId, content: "", status: "generating" as const },
+          [typeId]: {
+            typeId, content: "", status: "generating" as const,
+            reviewThread: threadEntry
+              ? [...(prev_artifact?.reviewThread ?? []), threadEntry]
+              : (prev_artifact?.reviewThread ?? []),
+          },
         },
       };
     }));
@@ -549,6 +578,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
         typeId,
         prerequisiteContext,
         projectId: activeProjectId,
+        regenerationContext,
       }),
     })
       .then(r => {
@@ -558,6 +588,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
       .then((data: { content: string; renderedSvg?: string }) => {
         setStoryList(prev => prev.map(s => {
           if (s.id !== storyId) return s;
+          const prev_artifact = s.storyDesignArtifacts?.[typeId];
           return {
             ...s,
             storyDesignArtifacts: {
@@ -568,6 +599,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
                 ...(data.renderedSvg ? { renderedSvg: data.renderedSvg } : {}),
                 status: "draft" as const,
                 generatedAt: new Date().toISOString(),
+                reviewThread: prev_artifact?.reviewThread,
               },
             },
           };
@@ -577,20 +609,22 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
       .catch((err: Error) => {
         setStoryList(prev => prev.map(s => {
           if (s.id !== storyId) return s;
+          const prev_artifact = s.storyDesignArtifacts?.[typeId];
           return {
             ...s,
             storyDesignArtifacts: {
               ...s.storyDesignArtifacts,
-              [typeId]: { typeId, content: "", status: "available" as const },
+              [typeId]: { typeId, content: "", status: "available" as const, reviewThread: prev_artifact?.reviewThread },
             },
           };
         }));
         toast.error(`Failed to generate ${config.label}: ${err.message}`);
       });
-  }, [storyList, activeProjectId]);
+  }, [storyList, activeProjectId, currentUser, addAuditEvent]);
 
   const approveStoryDesignArtifact = useCallback((storyId: string, typeId: ArtifactTypeId) => {
     const config = getArtifactConfig(typeId);
+    const entry = { id: generateId(), artifactId: `${storyId}-${typeId}`, type: "approved" as const, message: "Approved", author: currentUser.name, timestamp: new Date().toISOString() };
     setStoryList(prev => prev.map(s => {
       if (s.id !== storyId) return s;
       const existing = s.storyDesignArtifacts?.[typeId];
@@ -604,6 +638,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
             status: "approved" as const,
             approvedBy: currentUser.name,
             approvedAt: new Date().toISOString(),
+            reviewThread: [...(existing.reviewThread ?? []), entry],
           },
         },
       };
@@ -611,7 +646,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     addAuditEvent({
       type: "approval",
       title: `${config.label} approved`,
-      detail: `Approved by ${currentUser.name}`,
+      detail: "Approved",
       actor: currentUser.name,
       actorRole: currentUser.role,
       timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -622,6 +657,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
 
   const rejectStoryDesignArtifact = useCallback((storyId: string, typeId: ArtifactTypeId, reason: string) => {
     const config = getArtifactConfig(typeId);
+    const entry = { id: generateId(), artifactId: `${storyId}-${typeId}`, type: "rejected" as const, message: reason, author: currentUser.name, timestamp: new Date().toISOString() };
     setStoryList(prev => prev.map(s => {
       if (s.id !== storyId) return s;
       const existing = s.storyDesignArtifacts?.[typeId];
@@ -635,6 +671,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
             status: "rejected" as const,
             rejectedAt: new Date().toISOString(),
             rejectionReason: reason,
+            reviewThread: [...(existing.reviewThread ?? []), entry],
           },
         },
       };
@@ -642,7 +679,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     addAuditEvent({
       type: "approval",
       title: `${config.label} rejected`,
-      detail: `Rejected by ${currentUser.name}. Reason: ${reason}`,
+      detail: reason,
       actor: currentUser.name,
       actorRole: currentUser.role,
       timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -1275,7 +1312,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     toast.success(`Epic "${name}" created.`);
   }, [activeProjectId, currentUser, addAuditEvent]);
 
-  const generateProjectArtifact = useCallback((projectId: string, typeId: string) => {
+  const generateProjectArtifact = useCallback((projectId: string, typeId: string, regenerationContext?: string) => {
     const config = getProjectArtifactConfigs().find(c => c.id === typeId);
     if (!config) return;
 
@@ -1289,13 +1326,40 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     }
 
     const existingId = `proj-art-${projectId}-${typeId}`;
+    const isRegeneration = projectDesignArtifacts.some(a => a.projectId === projectId && a.typeId === typeId);
+    const threadEntry = isRegeneration ? {
+      id: generateId(),
+      artifactId: existingId,
+      type: "regenerated" as const,
+      message: regenerationContext ?? "Regenerated",
+      author: currentUser.name,
+      timestamp: new Date().toISOString(),
+    } : null;
+
     setProjectDesignArtifacts(prev => {
+      const existing = prev.find(a => a.projectId === projectId && a.typeId === typeId);
       const filtered = prev.filter(a => !(a.projectId === projectId && a.typeId === typeId));
       return [...filtered, {
         id: existingId, projectId, typeId, scope: "project" as const,
-        status: "generating", content: "", version: 1,
+        status: "generating", content: "", version: (existing?.version ?? 0) + 1,
+        reviewThread: threadEntry
+          ? [...(existing?.reviewThread ?? []), threadEntry]
+          : (existing?.reviewThread ?? []),
       }];
     });
+
+    if (threadEntry && regenerationContext) {
+      addAuditEvent({
+        type: "ai-action",
+        title: `${config.label} regenerated`,
+        detail: regenerationContext,
+        actor: currentUser.name,
+        actorRole: currentUser.role,
+        timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        proofHash: generateId(),
+        relatedProjectId: projectId,
+      });
+    }
 
     const prerequisiteContext: Record<string, string> = {};
     config.prerequisites.forEach(prereqId => {
@@ -1317,6 +1381,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
         projectDescription: activeProject?.description,
         typeId,
         prerequisiteContext,
+        regenerationContext,
       }),
     })
       .then(r => { if (!r.ok) throw new Error(`Agent call failed: ${r.status}`); return r.json(); })
@@ -1349,15 +1414,16 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
   }, [projectDesignArtifacts, currentUser, addAuditEvent]);
 
   const approveProjectArtifact = useCallback((artifactId: string) => {
+    const entry = { id: generateId(), artifactId, type: "approved" as const, message: "Approved", author: currentUser.name, timestamp: new Date().toISOString() };
     setProjectDesignArtifacts(prev => prev.map(a =>
       a.id === artifactId
-        ? { ...a, status: "approved" as const, approvedBy: currentUser.name, approvedAt: new Date().toISOString() }
+        ? { ...a, status: "approved" as const, approvedBy: currentUser.name, approvedAt: new Date().toISOString(), reviewThread: [...(a.reviewThread ?? []), entry] }
         : a
     ));
     addAuditEvent({
       type: "approval",
       title: "Project artifact approved",
-      detail: `Artifact ${artifactId} approved by ${currentUser.name}.`,
+      detail: "Approved",
       actor: currentUser.name,
       actorRole: currentUser.role,
       timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -1367,15 +1433,16 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
   }, [currentUser, addAuditEvent]);
 
   const rejectProjectArtifact = useCallback((artifactId: string, reason: string) => {
+    const entry = { id: generateId(), artifactId, type: "rejected" as const, message: reason, author: currentUser.name, timestamp: new Date().toISOString() };
     setProjectDesignArtifacts(prev => prev.map(a =>
       a.id === artifactId
-        ? { ...a, status: "rejected" as const, rejectedAt: new Date().toISOString(), rejectionReason: reason }
+        ? { ...a, status: "rejected" as const, rejectedAt: new Date().toISOString(), rejectionReason: reason, reviewThread: [...(a.reviewThread ?? []), entry] }
         : a
     ));
     addAuditEvent({
       type: "approval",
       title: "Project artifact rejected",
-      detail: `Artifact ${artifactId} rejected by ${currentUser.name}. Reason: ${reason}`,
+      detail: reason,
       actor: currentUser.name,
       actorRole: currentUser.role,
       timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -1384,20 +1451,47 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     toast.info("Artifact rejected — regenerate to try again.");
   }, [currentUser, addAuditEvent]);
 
-  const generateEpicArtifact = useCallback((epicId: string, typeId: string) => {
+  const generateEpicArtifact = useCallback((epicId: string, typeId: string, regenerationContext?: string) => {
     const epic = epicList.find(e => e.id === epicId);
     if (!epic) return;
     const config = getEpicArtifactConfigs().find(c => c.id === typeId);
     if (!config) return;
 
     const existingId = `epic-art-${epicId}-${typeId}`;
+    const isRegeneration = epicDesignArtifacts.some(a => a.epicId === epicId && a.typeId === typeId);
+    const threadEntry = isRegeneration ? {
+      id: generateId(),
+      artifactId: existingId,
+      type: "regenerated" as const,
+      message: regenerationContext ?? "Regenerated",
+      author: currentUser.name,
+      timestamp: new Date().toISOString(),
+    } : null;
+
     setEpicDesignArtifacts(prev => {
+      const existing = prev.find(a => a.epicId === epicId && a.typeId === typeId);
       const filtered = prev.filter(a => !(a.epicId === epicId && a.typeId === typeId));
       return [...filtered, {
         id: existingId, epicId, projectId: epic.projectId, typeId, scope: "epic" as const,
-        status: "generating", content: "", version: 1,
+        status: "generating", content: "", version: (existing?.version ?? 0) + 1,
+        reviewThread: threadEntry
+          ? [...(existing?.reviewThread ?? []), threadEntry]
+          : (existing?.reviewThread ?? []),
       }];
     });
+
+    if (threadEntry && regenerationContext) {
+      addAuditEvent({
+        type: "ai-action",
+        title: `${config.label} regenerated`,
+        detail: regenerationContext,
+        actor: currentUser.name,
+        actorRole: currentUser.role,
+        timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        proofHash: generateId(),
+        relatedProjectId: epic.projectId,
+      });
+    }
 
     const prerequisiteContext: Record<string, string> = {};
     const approvedTier1 = projectDesignArtifacts.filter(a => a.projectId === epic.projectId && a.status === "approved");
@@ -1408,7 +1502,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
     fetch("/api/epic/design-artifact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ epicName: epic.name, epicDescription: epic.description, typeId, prerequisiteContext }),
+      body: JSON.stringify({ epicName: epic.name, epicDescription: epic.description, typeId, prerequisiteContext, regenerationContext }),
     })
       .then(r => { if (!r.ok) throw new Error(`Agent call failed: ${r.status}`); return r.json(); })
       .then((data: { content: string }) => {
@@ -1438,15 +1532,16 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
   }, [epicList, epicDesignArtifacts, projectDesignArtifacts, currentUser, addAuditEvent]);
 
   const approveEpicArtifact = useCallback((artifactId: string) => {
+    const entry = { id: generateId(), artifactId, type: "approved" as const, message: "Approved", author: currentUser.name, timestamp: new Date().toISOString() };
     setEpicDesignArtifacts(prev => prev.map(a =>
       a.id === artifactId
-        ? { ...a, status: "approved" as const, approvedBy: currentUser.name, approvedAt: new Date().toISOString() }
+        ? { ...a, status: "approved" as const, approvedBy: currentUser.name, approvedAt: new Date().toISOString(), reviewThread: [...(a.reviewThread ?? []), entry] }
         : a
     ));
     addAuditEvent({
       type: "approval",
       title: "Epic artifact approved",
-      detail: `Artifact ${artifactId} approved by ${currentUser.name}.`,
+      detail: "Approved",
       actor: currentUser.name,
       actorRole: currentUser.role,
       timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -1456,15 +1551,16 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
   }, [currentUser, addAuditEvent]);
 
   const rejectEpicArtifact = useCallback((artifactId: string, reason: string) => {
+    const entry = { id: generateId(), artifactId, type: "rejected" as const, message: reason, author: currentUser.name, timestamp: new Date().toISOString() };
     setEpicDesignArtifacts(prev => prev.map(a =>
       a.id === artifactId
-        ? { ...a, status: "rejected" as const, rejectedAt: new Date().toISOString(), rejectionReason: reason }
+        ? { ...a, status: "rejected" as const, rejectedAt: new Date().toISOString(), rejectionReason: reason, reviewThread: [...(a.reviewThread ?? []), entry] }
         : a
     ));
     addAuditEvent({
       type: "approval",
       title: "Epic artifact rejected",
-      detail: `Artifact ${artifactId} rejected by ${currentUser.name}. Reason: ${reason}`,
+      detail: reason,
       actor: currentUser.name,
       actorRole: currentUser.role,
       timestamp: new Date().toLocaleString("en-US", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),

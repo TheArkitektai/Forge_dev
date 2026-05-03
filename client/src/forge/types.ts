@@ -630,6 +630,7 @@ export type StoryDesignArtifact = {
   approvedAt?: string;
   rejectedAt?: string;
   rejectionReason?: string;
+  reviewThread?: import("@shared/types/designArtifacts").ReviewEntry[];
 };
 
 /* ── Design Artifacts (legacy) ── */

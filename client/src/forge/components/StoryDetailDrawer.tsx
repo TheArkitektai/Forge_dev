@@ -765,7 +765,7 @@ export function StoryDetailDrawer() {
                 /* ── Design Phase: Artifact Dependency Map ── */
                 <ArtifactDependencyMap
                   story={story!}
-                  onGenerate={(typeId: ArtifactTypeId) => generateDesignArtifact(story!.id, typeId)}
+                  onGenerate={(typeId: ArtifactTypeId, regenerationContext?: string) => generateDesignArtifact(story!.id, typeId, regenerationContext)}
                   onApprove={(typeId: ArtifactTypeId) => approveStoryDesignArtifact(story!.id, typeId)}
                   onReject={(typeId: ArtifactTypeId, reason: string) => rejectStoryDesignArtifact(story!.id, typeId, reason)}
                   projectArtifacts={storyProjectArtifacts}

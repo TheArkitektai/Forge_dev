@@ -429,11 +429,12 @@ Return ONLY the JSON array, no markdown, no code fences.`,
 
   // ── Story-level design artifact generation ───────────────────────────────
   app.post("/api/story/design-artifact", async (req, res) => {
-    const { title, description, typeId, prerequisiteContext } = req.body as {
+    const { title, description, typeId, prerequisiteContext, regenerationContext } = req.body as {
       title: string;
       description?: string;
       typeId: string;
       prerequisiteContext?: Record<string, string>;
+      regenerationContext?: string;
     };
 
     if (!title || !typeId) {
@@ -447,6 +448,10 @@ Return ONLY the JSON array, no markdown, no code fences.`,
 
     const prereqSection = prerequisiteContext && Object.keys(prerequisiteContext).length > 0
       ? `\nPrerequisite artifact context:\n${Object.entries(prerequisiteContext).map(([k, v]) => `[${k}]: ${v}`).join("\n\n")}`
+      : "";
+
+    const regenerationSection = regenerationContext
+      ? `\nThe previous version was rejected. Specific correction required: ${regenerationContext}`
       : "";
 
     const PLANTUML_RULES = `RULES: Do NOT use !include, !define, or any external URL imports. Use ONLY built-in PlantUML syntax. Keep to under 20 participants/components.`;
@@ -531,7 +536,7 @@ LIMIT: 5-7 nodes, 5-8 edges.`,
           content: `You are the Architecture Agent in Arkitekt Forge. Generate a ${typeId} design artifact.
 
 Story: ${title}
-Description: ${description ?? "No description provided"}${prereqSection}
+Description: ${description ?? "No description provided"}${prereqSection}${regenerationSection}
 
 ${instruction}
 
@@ -581,11 +586,12 @@ Return ONLY the artifact content (JSON, PlantUML source, or markdown as specifie
 
   // ── Project-level design artifact generation ─────────────────────────────
   app.post("/api/project/design-artifact", async (req, res) => {
-    const { projectName, projectDescription, typeId, prerequisiteContext } = req.body as {
+    const { projectName, projectDescription, typeId, prerequisiteContext, regenerationContext } = req.body as {
       projectName: string;
       projectDescription?: string;
       typeId: string;
       prerequisiteContext?: Record<string, string>;
+      regenerationContext?: string;
     };
 
     if (!projectName || !typeId) {
@@ -599,6 +605,10 @@ Return ONLY the artifact content (JSON, PlantUML source, or markdown as specifie
 
     const prereqSection = prerequisiteContext && Object.keys(prerequisiteContext).length > 0
       ? `\nPrerequisite context:\n${Object.entries(prerequisiteContext).map(([k, v]) => `[${k}]: ${v}`).join("\n\n")}`
+      : "";
+
+    const regenerationSection = regenerationContext
+      ? `\nThe previous version was rejected. Specific correction required: ${regenerationContext}`
       : "";
 
     const typeInstructions: Record<string, string> = {
@@ -625,7 +635,7 @@ Return ONLY the artifact content (JSON, PlantUML source, or markdown as specifie
           content: `You are the Architecture Agent in Arkitekt Forge. Generate a project-level ${typeId} artifact.
 
 Project: ${projectName}
-Description: ${projectDescription ?? "No description provided"}${prereqSection}
+Description: ${projectDescription ?? "No description provided"}${prereqSection}${regenerationSection}
 
 ${instruction}
 
@@ -648,11 +658,12 @@ Return ONLY the artifact content. No preamble, no explanation.`,
 
   // ── Epic-level design artifact generation ────────────────────────────────
   app.post("/api/epic/design-artifact", async (req, res) => {
-    const { epicName, epicDescription, typeId, prerequisiteContext } = req.body as {
+    const { epicName, epicDescription, typeId, prerequisiteContext, regenerationContext } = req.body as {
       epicName: string;
       epicDescription?: string;
       typeId: string;
       prerequisiteContext?: Record<string, string>;
+      regenerationContext?: string;
     };
 
     if (!epicName || !typeId) {
@@ -666,6 +677,10 @@ Return ONLY the artifact content. No preamble, no explanation.`,
 
     const prereqSection = prerequisiteContext && Object.keys(prerequisiteContext).length > 0
       ? `\nPrerequisite context:\n${Object.entries(prerequisiteContext).map(([k, v]) => `[${k}]: ${v}`).join("\n\n")}`
+      : "";
+
+    const regenerationSection = regenerationContext
+      ? `\nThe previous version was rejected. Specific correction required: ${regenerationContext}`
       : "";
 
     const typeInstructions: Record<string, string> = {
@@ -690,7 +705,7 @@ Return ONLY the artifact content. No preamble, no explanation.`,
           content: `You are the Architecture Agent in Arkitekt Forge. Generate an epic-level ${typeId} artifact.
 
 Epic: ${epicName}
-Description: ${epicDescription ?? "No description provided"}${prereqSection}
+Description: ${epicDescription ?? "No description provided"}${prereqSection}${regenerationSection}
 
 ${instruction}
 
