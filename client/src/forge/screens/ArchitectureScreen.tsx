@@ -183,6 +183,16 @@ function ProjectArtifactCard({ artifact, config, onGenerate, onApprove, onReject
         </div>
       )}
 
+      {status === "draft" && (() => {
+        const lastRejection = artifact?.reviewThread?.slice().reverse().find(e => e.type === "rejected");
+        return lastRejection ? (
+          <div className="mt-2 rounded-[8px] bg-amber-50 border border-amber-100 px-3 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-500 mb-0.5">Previous feedback</p>
+            <p className="text-[11px] text-amber-800 leading-4">{lastRejection.message}</p>
+          </div>
+        ) : null;
+      })()}
+
       {!rejecting && !showRegeneratePrompt && (
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           {(status === "not_generated" || !artifact) && (
