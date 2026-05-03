@@ -545,6 +545,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
           ...s.storyDesignArtifacts,
           [typeId]: {
             typeId, content: "", status: "generating" as const,
+            rejectionReason: prev_artifact?.rejectionReason,
             reviewThread: threadEntry
               ? [...(prev_artifact?.reviewThread ?? []), threadEntry]
               : (prev_artifact?.reviewThread ?? []),
@@ -599,6 +600,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
                 ...(data.renderedSvg ? { renderedSvg: data.renderedSvg } : {}),
                 status: "draft" as const,
                 generatedAt: new Date().toISOString(),
+                rejectionReason: prev_artifact?.rejectionReason,
                 reviewThread: prev_artifact?.reviewThread,
               },
             },
@@ -1342,6 +1344,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
       return [...filtered, {
         id: existingId, projectId, typeId, scope: "project" as const,
         status: "generating", content: "", version: (existing?.version ?? 0) + 1,
+        rejectionReason: existing?.rejectionReason,
         reviewThread: threadEntry
           ? [...(existing?.reviewThread ?? []), threadEntry]
           : (existing?.reviewThread ?? []),
@@ -1474,6 +1477,7 @@ export function ForgeProvider({ children }: { children: ReactNode }) {
       return [...filtered, {
         id: existingId, epicId, projectId: epic.projectId, typeId, scope: "epic" as const,
         status: "generating", content: "", version: (existing?.version ?? 0) + 1,
+        rejectionReason: existing?.rejectionReason,
         reviewThread: threadEntry
           ? [...(existing?.reviewThread ?? []), threadEntry]
           : (existing?.reviewThread ?? []),

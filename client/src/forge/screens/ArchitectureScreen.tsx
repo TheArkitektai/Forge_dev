@@ -176,22 +176,25 @@ function ProjectArtifactCard({ artifact, config, onGenerate, onApprove, onReject
         {artifact?.approvedBy && <span className="text-[10px] text-slate-400">by {artifact.approvedBy}</span>}
       </div>
 
-      {status === "rejected" && artifact?.rejectionReason && (
-        <div className="mt-2 rounded-[8px] bg-red-50 border border-red-100 px-3 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-red-400 mb-0.5">Rejection reason</p>
-          <p className="text-[11px] text-red-700 leading-4">{artifact.rejectionReason}</p>
+      {(status === "rejected" || status === "draft") && artifact?.rejectionReason && (
+        <div className={cn(
+          "mt-2 rounded-[8px] border px-3 py-2",
+          status === "rejected" ? "bg-red-50 border-red-100" : "bg-amber-50 border-amber-100"
+        )}>
+          <p className={cn(
+            "text-[10px] font-semibold uppercase tracking-[0.1em] mb-0.5",
+            status === "rejected" ? "text-red-400" : "text-amber-500"
+          )}>
+            {status === "rejected" ? "Rejection reason" : "Previous feedback"}
+          </p>
+          <p className={cn(
+            "text-[11px] leading-4",
+            status === "rejected" ? "text-red-700" : "text-amber-800"
+          )}>
+            {artifact.rejectionReason}
+          </p>
         </div>
       )}
-
-      {status === "draft" && (() => {
-        const lastRejection = artifact?.reviewThread?.slice().reverse().find(e => e.type === "rejected");
-        return lastRejection ? (
-          <div className="mt-2 rounded-[8px] bg-amber-50 border border-amber-100 px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-500 mb-0.5">Previous feedback</p>
-            <p className="text-[11px] text-amber-800 leading-4">{lastRejection.message}</p>
-          </div>
-        ) : null;
-      })()}
 
       {!rejecting && !showRegeneratePrompt && (
         <div className="mt-3 flex items-center gap-2 flex-wrap">
